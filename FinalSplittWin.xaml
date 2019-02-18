@@ -1,0 +1,20 @@
+﻿<Window x:Class="File_Split_and_Join.FinalSplitWin"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="{DynamicResource StartSplitTitle}" MinHeight="170" MaxHeight="170" Height="170" MinWidth="655" Width="655" WindowStyle="ToolWindow"  Icon="split.ico" Closed="Window_Closed" Closing="Window_Closing">
+    <Window.TaskbarItemInfo>
+        <TaskbarItemInfo ProgressState="Normal" />
+    </Window.TaskbarItemInfo>
+    <Grid>
+        <CheckBox x:Name="everyCut" Content="{DynamicResource CheckBoxSectionEvery}" ToolTip="{DynamicResource CheckBoxSectionEveryToolTip}" HorizontalAlignment="Right" Margin="0,47,12,0" VerticalAlignment="Top" Foreground="DarkGreen" Click="repeatCut_Click"/>
+        <TextBox Tag="1" x:Name="wathRepeat" ToolTip="{DynamicResource TextBoxWathRepeatToolTip}" HorizontalAlignment="Right" Height="22" Margin="0,64,12,0" TextWrapping="Wrap" Text="1" VerticalAlignment="Top" Width="80" TextAlignment="Right" IsEnabled="False" TextChanged="wathRepeat_TextChanged" MouseWheel="wathRepeat_MouseWheel"/>
+
+        <TextBox x:Name="DestinationFolderTextBox" Height="26" Margin="9,10,135,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" IsReadOnly="True" Background="#FFECE6E6" BorderBrush="Black"/>
+        <Button x:Name="DestinationButtonSelect" Content="{DynamicResource ButtonDestinationFolder}" Height="26" Margin="0,10,10,0" VerticalAlignment="Top" Click="Button_Click" HorizontalAlignment="Right" Width="120"/>
+        <Label x:Name="LabelSplitMode" ToolTip="{DynamicResource LabelSplitModeToolTip}" Content="{DynamicResource LabelSplitMode}" HorizontalAlignment="Left" Height="26" Margin="9,47,0,0" VerticalAlignment="Top"/>
+        <Label x:Name="LabelSplitOf" Content="{DynamicResource LabelSplitOf}" HorizontalAlignment="Left" Height="26" Margin="9,73,0,0" VerticalAlignment="Top"/>
+        <ProgressBar x:Name="ProgressBarSplitFile" Margin="10,110,253,0" Height="22" VerticalAlignment="Top" Maximum="100" ValueChanged="ProgressBarSplitFile_ValueChanged"/>
+        <Button x:Name="StartButton" Content="Start" Height="22" Margin="0,110,10,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="113" Click="Button_Click_Start"/>
+        <Button x:Name="CanselButton" Content="Cancel" Height="22" Margin="0,110,135,0" VerticalAlignment="Top" IsCancel="True" IsDefault="True" HorizontalAlignment="Right" Width="113"/>
+    </Grid>
+</Window>

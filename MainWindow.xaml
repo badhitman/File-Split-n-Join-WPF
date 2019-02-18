@@ -1,0 +1,56 @@
+﻿<Window
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:File_Split_and_Join" x:Class="File_Split_and_Join.MainWindow"
+        Title="File Split and Join FREE.PRO" MinHeight="380.149" MinWidth="692.164" Icon="split.ico" Height="581">
+    <Grid x:Name="OutWrap" Margin="0,0,0,3" >
+        <Grid.RowDefinitions>
+            <RowDefinition Height="22"/>
+            <RowDefinition Height="30"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0">
+            <Menu>
+                <MenuItem Header="{DynamicResource MenuItemFile}">
+                    <MenuItem Header="{DynamicResource MenuItemMode}">
+                        <MenuItem x:Name="menu_item_Split" Header="{DynamicResource MenuItemSplit}" IsCheckable="True" Click="select_mode"/>
+                        <MenuItem x:Name="menu_item_Join" Header="{DynamicResource MenuItemJoin}" IsCheckable="True" Click="select_mode"/>
+                        <MenuItem x:Name="menu_item_MD5" Header="{DynamicResource MenuItemMD5}" IsCheckable="True" Click="select_mode"/>
+                    </MenuItem>
+                    <Separator/>
+                    <MenuItem Header="{DynamicResource MenuItemExit}" Click="CloseProgramm"/>
+                </MenuItem>
+                <MenuItem Header="{DynamicResource MenuItemSettings}">
+                    <MenuItem Header="{DynamicResource MenuItemLanguage}" x:Name="lngs_MenuItem" SubmenuClosed="lngs_MenuItem_SubmenuClosed">
+                        <MenuItem Tag="lng" Name="rus_MenuItem" Header="Русский" IsCheckable="True" Click="select_Checkable"/>
+                        <MenuItem Tag="lng" Name="eng_MenuItem" Header="English" IsCheckable="True" Click="select_Checkable"/>
+                        <MenuItem Tag="lng" Name="deu_MenuItem" Header="Deutsch" IsCheckable="True" Click="select_Checkable"/>
+                        <MenuItem Tag="lng" Name="spa_MenuItem" Header="Español" IsCheckable="True" Click="select_Checkable"/>
+                        <MenuItem Tag="lng" Name="ita_MenuItem" Header="Italiana" IsCheckable="True" Click="select_Checkable"/>
+                        <MenuItem Tag="lng" Name="rom_MenuItem" Header="Română" IsCheckable="True" Click="select_Checkable"/>
+                        <MenuItem Tag="lng" Name="fra_MenuItem" Header="Français" IsCheckable="True" Click="select_Checkable"/>
+                        <MenuItem Tag="lng" Name="cze_MenuItem" Header="Čeština" IsCheckable="True" Click="select_Checkable"/>
+                    </MenuItem>
+                </MenuItem>
+                <MenuItem Header="{DynamicResource MenuItemInfo}">
+                    <MenuItem Header="About" Click="MenuItem_Click_About" />
+                    <Separator/>
+                    <MenuItem Header="{DynamicResource MenuItemVisitWebsite}" Tag="http://iq-s.pro/%D1%81%D0%BA%D0%B0%D1%87%D0%B0%D1%82%D1%8C?ad" Click="gotourl"/>
+                </MenuItem>
+            </Menu>
+            <!--<ToggleButton x:Name="b_Slitt" Content="Split" Grid.Row="1" Grid.Column="0" HorizontalAlignment="Stretch" Click="b_SnJ_Click"/>
+            <ToggleButton x:Name="b_Join" Content="Join" Grid.Column="1" Click="b_SnJ_Click"/>-->
+        </Grid>
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <ToggleButton Margin="2" x:Name="b_Split" Content="{DynamicResource MenuItemSplit}" Click="b_SnJ_Click"/>
+            <ToggleButton Margin="2" x:Name="b_Join" Content="{DynamicResource MenuItemJoin}" Grid.Column="1" Click="b_SnJ_Click"/>
+            <ToggleButton Margin="2" x:Name="b_MD5" Content="{DynamicResource MenuItemMD5}" Grid.Column="2" Click="b_SnJ_Click"/>
+        </Grid>
+        <DockPanel x:Name="testSP" HorizontalAlignment="Stretch" LastChildFill="True" Margin="5,5,5,10" Grid.Row="2" VerticalAlignment="Stretch"/>
+    </Grid>
+</Window>
