@@ -1,13 +1,12 @@
 ﻿////////////////////////////////////////////////
 // © https://github.com/badhitman 
 ////////////////////////////////////////////////
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace File_Split_and_Join
+namespace SplitterJoinerFileCore
 {
     /// <summary>
     /// Направление чтение файла. Лево (к началу), право (к концу)
@@ -19,150 +18,260 @@ namespace File_Split_and_Join
     /// </summary>
     public class SplitAndJoinFile
     {
+        #region Событие, возникающее по мере выполнения процесса извлечения данных из файла
+        public delegate void ProgressValueChangedHandler(int percentage);
+        // Событие, возникающее по мере выполнения процесса извлечения данных из файла
+        public event ProgressValueChangedHandler ProgressValueChange;
+        #endregion
+
+        ///////////////////////////////////////////////////////////////////////////////////
         /// <summary>
         /// Поток файла результата
         /// </summary>
-        private FileStream fs_out;
+        protected FileStream fs_out;
 
         /// <summary>
         /// Исходный файл
         /// </summary>
-        private FileStream fs_in;
+        protected FileStream fs_read;
 
-        private BinaryReader bin_read;
-        private BinaryWriter bin_writ;
-        //
-        private int _PreDefinedBuferSize;
+        ///////////////////////////////////////////////////////////////////////////////////
+        /// <summary>
+        /// Режим кодировки данных
+        /// </summary>
+        public static Encoding EncodingMode { get; protected set; } = Encoding.UTF8;
 
-        public static byte[] StreamToByte(Stream input)
+        /// <summary>
+        /// Текущая позиция в исходном файле
+        /// </summary>
+        public long Position
         {
-            byte[] buffer = new byte[16 * 1024];
-            using (MemoryStream ms = new MemoryStream())
+            get => (fs_read is null || !fs_read.CanRead) ? -1 : fs_read.Position;
+            set
             {
-                int read;
-                while ((read = input.Read(buffer, 0, buffer.Length)) > 0)
-                {
-                    ms.Write(buffer, 0, read);
-                }
-                return ms.ToArray();
+                if (fs_read is null || !fs_read.CanRead)
+                    return;
+
+                if (value < 0)
+                    fs_read.Position = 0;
+                else if (value > Length)
+                    fs_read.Position = Length;
+                else
+                    fs_read.Position = value;
             }
         }
 
-        public static byte[] StringToByte(string s)
+        /// <summary>
+        /// Размер исходного файла
+        /// </summary>
+        public long Length => (fs_read is null || !fs_read.CanRead) ? -1 : fs_read.Length;
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        /// <summary>
+        /// Преобразовать строку в шаблон данных для поиска
+        /// </summary>
+        /// <param name="search_string">Строка поиска</param>
+        /// <param name="ignore_case">режим игнорирования регистра строки поиска</param>
+        /// <returns>Шаблон данных дял поиска в текущей кодировке [EncodingMode]</returns>
+        public static byte[][] StringToBytes(string search_string, bool ignore_case = false)
         {
-            MemoryStream stream = new MemoryStream();
-            StreamWriter writer = new StreamWriter(stream);
-            writer.Write(s);
-            writer.Flush();
-            stream.Position = 0;
-            return StreamToByte(stream);
+            byte[][] result_bytes = new byte[search_string.Length][];
+            string s;
+            for (int i = 0; i < search_string.Length; i++)
+            {
+                s = search_string.Substring(i, 1);
+                if (ignore_case)
+                    result_bytes[i] = new byte[] { EncodingMode.GetBytes(s.ToLower())[0], EncodingMode.GetBytes(s.ToUpper())[0] };
+                else
+                    result_bytes[i] = new byte[] { EncodingMode.GetBytes(s)[0] };
+            }
+            return result_bytes;
         }
 
-        public static byte[] HexToByte(string s)
+        /// <summary>
+        /// Определить кодировку по имени
+        /// </summary>
+        /// <param name="encoding_name">Имя кодировки</param>
+        /// <returns>Указатель кодировки, определённой по строке имени</returns>
+        public static Encoding DetectEncoding(string encoding_name)
         {
-            return s.Split('-').Select(b => Convert.ToByte(b, 16)).ToArray();
-        }
-
-        public static string StringToHEX(string s)
-        {
-            return BitConverter.ToString(Encoding.Default.GetBytes(s));
+            switch (encoding_name.ToLower())
+            {
+                case "utf8":
+                    return Encoding.UTF8;
+                case "ascii":
+                    return Encoding.ASCII;
+                case "unicode":
+                    return Encoding.Unicode;
+                case "bigendianunicode":
+                    return Encoding.BigEndianUnicode;
+                case "utf32":
+                    return Encoding.UTF32;
+                case "utf7":
+                    return Encoding.UTF7;
+                default:
+                    return Encoding.Default;
+            }
         }
 
         ///////////////////////////////////////////////////////////////////////////////////
+        /// <summary>
+        /// Конструктор
+        /// </summary>
+        /// <param name="encoding">Режим кодировки файлов. Можно изменить в дальнейшем через метод SetEncoding</param>
+        public SplitAndJoinFile(Encoding encoding) => SetEncoding(encoding);
 
-        public void OpenFile(string PathFile, int PreDefBuferSize = 8192)
+        /// <summary>
+        /// Установить кодировку работы с файлом. При попытке установить NULL -> установится по умолчанию: Encoding.UTF8
+        /// </summary>
+        public void SetEncoding(Encoding encoding = null)
         {
-            fs_in = new FileStream(PathFile, FileMode.Open, FileAccess.Read);
-            fs_in.Lock(0, fs_in.Length);
-            _PreDefinedBuferSize = PreDefBuferSize;
+            if (encoding is null)
+                EncodingMode = Encoding.UTF8;
+            else
+                EncodingMode = encoding;
+        }
+        public void SetEncoding(string string_encoding) => SetEncoding(DetectEncoding(string_encoding));
+
+        /// <summary>
+        /// Открыть для чтения файл
+        /// </summary>
+        /// <param name="path_file">Путь к файлу для чтения/обработки</param>
+        /// <param name="PreDefBuferSize">Размер буфера чтения</param>
+        public void OpenFile(string path_file)
+        {
+            CloseFile();
+
+            fs_read = new FileStream(path_file, FileMode.Open, FileAccess.Read);
+            fs_read.Lock(0, fs_read.Length);
         }
 
-        public long Position
+        /// <summary>
+        /// Закрыть оригинальный файл (если открыт)
+        /// </summary>
+        public void CloseFile()
         {
-            get { return fs_in.Position; }
-            set
+            if (!(fs_read is null))
             {
-                if (value < 0)
-                    fs_in.Position = 0;
-                else if (value > Length)
-                    fs_in.Position = Length;
-                else
-                    fs_in.Position = value;
+                fs_read.Close();
+                fs_read.Dispose();
+                fs_read = null;
             }
         }
 
-        public long Length
-        {
-            get { return fs_in.Length; }
-        }
-
+        #region read data in files
         /// <summary>
         /// Возвращает массив байт слева и справа от указанной точки указанного размера в байтах
         /// </summary>
         /// <param name="position">Точка от которой читать данные</param>
-        /// <param name="sizeArea">Желаемый размер данных</param>
-        /// <param name="encode">Кодировка в которой следует прочитать данные /System.Text.Encoding/ (Default, UTF8, ASCII, Unicode, BigEndianUnicode, UTF32, UTF7 или без указания кодировки)</param>
-        /// <returns>Коллекция из двух значений Dictionary<ReadingDirection, byte[]></returns>
-        public Dictionary<ReadingDirection, byte[]> ReadDataAboutPosition(long position, int sizeArea, string encode)
+        /// <param name="size_area">Желаемый размер данных в каждом из направлений от точки (вначало и в конец)</param>
+        public Dictionary<ReadingDirection, byte[]> ReadDataAboutPosition(long position, int size_area) => new Dictionary<ReadingDirection, byte[]>
         {
-            Dictionary<ReadingDirection, byte[]> returnedData = new Dictionary<ReadingDirection, byte[]> { };
-            returnedData[ReadingDirection.Left] = readBytes(position - sizeArea, position, encode);
-            returnedData[ReadingDirection.Rifht] = readBytes(position, position + sizeArea, encode);
-            return returnedData;
-        }
+            { ReadingDirection.Left, ReadBytes(position - size_area, position) },
+            { ReadingDirection.Rifht, ReadBytes(position, position + size_area) }
+        };
 
         /// <summary>
         /// Читает и возвращает массив байт из файла. Если начальная точка больше или равна конечной точки, то возвращается пустой массив байт.
         /// </summary>
-        /// <param name="PointStart">Начальная точка чтения байт. Если меньше нуля, то читает с начала файла (с позиции 0). Если точка больше размера файла, то возвращается пустой массив байт.</param>
-        /// <param name="PointEnd">Конечная точка чтения байт. Если точка больше размера фалйла, то читается до конца файла</param>
-        /// <param name="encode">Кодировка (Не обязательно). Указывает в какой кодировке читать данные /System.Text.Encoding/ (Default, UTF8, ASCII, Unicode, BigEndianUnicode, UTF32, UTF7 или без указания кодировки)</param>
+        /// <param name="StartPosition">Начальная точка чтения байт. Если меньше нуля, то читает с начала файла (с позиции 0). Если точка больше размера файла, то возвращается пустой массив байт.</param>
+        /// <param name="EndPosition">Конечная точка чтения байт. Если точка больше размера фалйла, то читается до конца файла</param>
         /// <returns>Возвращает массив байт из файла с произвольной точки до произвольной точки</returns>
-        public byte[] readBytes(long PointStart, long PointEnd, string encode = "")
+        public byte[] ReadBytes(long StartPosition, long EndPosition)
         {
-            long TruePosition = fs_in.Position;
-            byte[] returned_data = new byte[] { };
+            // Запоминаем позицию курсора в файле, что бы потом вернуть его на место
+            long current_position_of_stream = Position;
             //
-            if (PointStart < 0)
-                PointStart = 0;
-            if (PointEnd > fs_in.Length)
-                PointEnd = fs_in.Length;
-            if (PointStart > fs_in.Length || PointStart >= PointEnd)
-                return returned_data;
-            this.fs_in.Position = PointStart;
-            returned_data = new byte[PointEnd - PointStart];
-            switch (encode.ToLower())
-            {
-                case "default":
-                    this.bin_read = new BinaryReader(this.fs_in, Encoding.Default);
-                    break;
-                case "utf8":
-                    this.bin_read = new BinaryReader(this.fs_in, Encoding.UTF8);
-                    break;
-                case "ascii":
-                    this.bin_read = new BinaryReader(this.fs_in, Encoding.ASCII);
-                    break;
-                case "unicode":
-                    this.bin_read = new BinaryReader(this.fs_in, Encoding.Unicode);
-                    break;
-                case "bigendianunicode":
-                    this.bin_read = new BinaryReader(this.fs_in, Encoding.BigEndianUnicode);
-                    break;
-                case "utf32":
-                    this.bin_read = new BinaryReader(this.fs_in, Encoding.UTF32);
-                    break;
-                case "utf7":
-                    this.bin_read = new BinaryReader(this.fs_in, Encoding.UTF7);
-                    break;
-                default:
-                    this.bin_read = new BinaryReader(this.fs_in);
-                    break;
-            }
-            bin_read.BaseStream.Position = PointStart;
-            bin_read.Read(returned_data, 0, (int)(PointEnd - PointStart));
-            fs_in.Position = TruePosition;
+            if (StartPosition < 0)
+                StartPosition = 0;
+
+            if (EndPosition > Length)
+                EndPosition = Length;
+
+            if (Length < 1 || StartPosition >= EndPosition)
+                return new byte[] { };
+
+            byte[] returned_data = new byte[EndPosition - StartPosition];
+
+            Position = StartPosition;
+
+            for (int i = 0; i < returned_data.Length; i++)
+                returned_data[i] = (byte)fs_read.ReadByte();
+            //
+            Position = current_position_of_stream;
             return returned_data;
         }
+        #endregion
+
+        #region FindDataAll by byte[][] or string
+        public long[] FindDataAll(string searchdata, bool ignore_case, long StartPosition) => FindDataAll(StringToBytes(searchdata, ignore_case), StartPosition);
+        public long[] FindDataAll(byte[][] bytes_search, long StartPosition)
+        {
+            List<long> indexes = new List<long>();
+
+            long index_match = -1;
+            while (true)
+            {
+                index_match = FindData(bytes_search, StartPosition);
+                if (index_match < 0)
+                    break;
+                else
+                {
+                    indexes.Add(index_match);
+                    StartPosition = index_match + bytes_search.Length;
+                }
+            }
+
+            return indexes.ToArray();
+        }
+        #endregion
+
+        #region FindData by byte[][] or string
+        public long FindData(string searchdata, bool ignore_case, long StartPosition) => FindData(StringToBytes(searchdata, ignore_case), StartPosition);
+        public long FindData(byte[][] bytes_search, long StartPosition)
+        {
+            if (StartPosition >= Length)
+                return -1;
+
+            // Запоминаем позицию курсора в файле, что бы потом вернуть его на место
+            long original_position_of_stream = Position;
+
+            // Сохраняем значение в отдельную переменную, чтобы не обращаться к ней в цикле
+            long file_length = Length;
+
+            long WorkingReadPosition = Position = StartPosition;
+
+            long initial_match_index = 0;
+            int synchronous_search_index = 0;
+            int dataSearchLength = bytes_search.Length;
+            while (WorkingReadPosition <= file_length)
+            {
+                if (bytes_search[synchronous_search_index].Contains((byte)fs_read.ReadByte()))
+                {
+                    if (synchronous_search_index == 0)
+                        initial_match_index = WorkingReadPosition;
+
+                    synchronous_search_index++;
+                }
+                else
+                    synchronous_search_index = 0;
+
+                // Если достигли конечного байта (искомого массивай байт) в котором последовательно сошлись все байты с прочитаными из файла - значит есть полное совпадение
+                if (synchronous_search_index == dataSearchLength)
+                {
+                    // возвращаем позицию курсосра в файле на исходную позицию
+                    Position = original_position_of_stream;
+                    return initial_match_index;
+                }
+
+                WorkingReadPosition++;
+            }
+
+            // возвращаем позицию курсосра в файле на исходную позицию
+            Position = original_position_of_stream;
+            return -1;
+        }
+        #endregion
 
         /// <summary>
         /// Копирует часть данных из файла в новый файл с произвольной точки до произвольной точки
@@ -173,11 +282,13 @@ namespace File_Split_and_Join
         /// <param name="newFileName">Имя нового файла в папке назначения</param>
         public void ExtractData(long PointStart, long PointEnd, string destFolder, string newFileName)
         {
-            long SizeData = PointEnd - PointStart;
+            /*long SizeData = PointEnd - PointStart;
+
             if (!Directory.Exists(destFolder))
                 Directory.CreateDirectory(destFolder);
+
             byte[] wdata = new byte[] { };
-            this.fs_out = new FileStream(destFolder + "\\" + newFileName, FileMode.Create);
+            fs_out = new FileStream(destFolder + "\\" + newFileName, FileMode.Create);
             bin_writ = new BinaryWriter(this.fs_out);
 
             int markerFlush = 0;
@@ -185,17 +296,17 @@ namespace File_Split_and_Join
             while (SizeData > 0)
             {
 
-                if (SizeData > _PreDefinedBuferSize)
+                if (SizeData > BuferSize)
                 {
-                    ActualPoint = PointStart + _PreDefinedBuferSize;
-                    bin_writ.Write(readBytes(PointStart, PointStart + _PreDefinedBuferSize));
-                    PointStart += _PreDefinedBuferSize;
-                    SizeData -= _PreDefinedBuferSize;
+                    ActualPoint = PointStart + BuferSize;
+                    bin_writ.Write(ReadBytes(PointStart, PointStart + BuferSize));
+                    PointStart += BuferSize;
+                    SizeData -= BuferSize;
                 }
                 else
                 {
                     ActualPoint = PointStart + SizeData;
-                    bin_writ.Write(readBytes(PointStart, PointStart + SizeData));
+                    bin_writ.Write(ReadBytes(PointStart, PointStart + SizeData));
                     break;
                 }
 
@@ -203,49 +314,16 @@ namespace File_Split_and_Join
                 if (markerFlush >= 20)
                 {
                     bin_writ.Flush();
-                    this.fs_out.Flush();
+                    fs_out.Flush();
                     markerFlush = 0;
+                    ProgressValueChange?.Invoke(((int)(ActualPoint / (fs_in.Length / 100))));
                     //_win.Dispatcher.Invoke(new Action(() => ProgressBarValueChanged(((int)(ActualPoint / (fs_in.Length / 100))), _win)));
                 }
             }
+            ProgressValueChange?.Invoke(((int)(ActualPoint / (fs_in.Length / 100))));
             //_win.Dispatcher.Invoke(new Action(() => ProgressBarValueChanged(((int)(ActualPoint / (fs_in.Length / 100))), _win)));
             bin_writ.Close();
-            this.fs_out.Close();
-        }
-
-        /// <summary>
-        /// Найти в файле данные. Поиск производится с указанной точки и до конца
-        /// </summary>
-        /// <param name="dataSearch">Данные, которые нужно искать</param>
-        /// <param name="PointStartSearch">Точка в файле с которой нужно начинать поиск</param>
-        /// <returns>Позиция в файле, начиная с которой начинаются искомые данные</returns>
-        public long FindData(byte[] dataSearch, long PointStartSearch)//, MainWindow my_win
-        {
-            long TruePosition = fs_in.Position;
-            long myPointStartRead = PointStartSearch;
-            long fs_inLength = fs_in.Length;
-            fs_in.Position = myPointStartRead;
-            int dataSearchLength = dataSearch.Length;
-            while (myPointStartRead + dataSearchLength < fs_inLength && !dataSearch.SequenceEqual(readBytes(myPointStartRead, myPointStartRead + dataSearchLength)))
-            {
-                myPointStartRead++;
-                if (myPointStartRead + dataSearchLength >= fs_inLength)
-                    break;
-            }
-            if (dataSearch.SequenceEqual(readBytes(myPointStartRead, myPointStartRead + dataSearchLength)))
-                return myPointStartRead;
-            else
-            {
-                // System.Windows.MessageBox.Show("End of file", "End of file", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Asterisk);
-            }
-            fs_in.Position = TruePosition;
-            return fs_inLength;
-        }
-
-        private void ProgressBarValueChanged(int percentage) // , FinalSplitWin _win
-        {
-            //_win.ProgressBarSplitFile.Value = percentage;
-            //_win.TaskbarItemInfo.ProgressValue = (double)percentage / (double)100;
+            fs_out.Close();*/
         }
 
         /// <summary>
@@ -255,12 +333,12 @@ namespace File_Split_and_Join
         /// <param name="size"></param>
         /// <param name="repeat"></param>
         /// <param name="repeatEvery"></param>
-        public void SplitFile(string destFolder, long size, bool repeat = false, int repeatEvery = 1)//FinalSplitWin _win, 
+        public void SplitFile(string destFolder, long size, bool repeat = false, int repeatEvery = 1)
         {
             int partFile = 0;
             long StartPosition = 0;
-            long EndPosition = fs_in.Length;
-            string strNewFileNames = Path.GetFileName(this.fs_in.Name);
+            long EndPosition = fs_read.Length;
+            string strNewFileNames = Path.GetFileName(fs_read.Name);
             while (StartPosition + size * repeatEvery < EndPosition)
             {
                 partFile++;
@@ -274,26 +352,25 @@ namespace File_Split_and_Join
             }
             if (StartPosition < EndPosition)
             {
-                //ExtractData(_win, StartPosition, EndPosition, destFolder, strNewFileNames + ".part_" + (partFile + 1).ToString());
+                ExtractData(StartPosition, EndPosition, destFolder, strNewFileNames + ".part_" + (partFile + 1).ToString());
             }
-            //System.Windows.MessageBox.Show("End of file", "Done", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Asterisk);
         }
 
         /// <summary>
-        /// Берёт исходный файл и создаёт "нарезку" файлов используя для разделителя строку
+        /// Берёт исходный файл и создаёт "нарезку" файлов используя для разделителя byte[]
         /// </summary>
         /// <param name="destFolder">Папка назначения для новых файлов</param>
         /// <param name="textSplit">Текст по которому нужно делить файл</param>
         /// <param name="repeat">true - если следует нарезать весь файл. false - если нужно на вырезать одну часть файла</param>
         /// <param name="repeatEvery">Если нужно нарезать весь файл, то можно указать сколько вхождений искомой строки должно войти в одну партию файла</param>
-        public void SplitFile(string destFolder, byte[] dataSearch, bool repeat = false, int repeatEvery = 1)//FinalSplitWin _win, 
+        public void SplitFile(string destFolder, byte[][] dataSearch, bool repeat = false, int repeatEvery = 1)
         {
             int partFile = 0;
             long StartPosition = 0;
             //byte[] dataSearch = StringToByte(textSplit);
             int dataSearchLength = dataSearch.Length;
-            long EndPosition = fs_in.Length;
-            string strNewFileNames = Path.GetFileName(this.fs_in.Name);
+            long EndPosition = fs_read.Length;
+            string strNewFileNames = Path.GetFileName(this.fs_read.Name);
             long entryPoint = FindData(dataSearch, 0);
             int countEvery = repeatEvery - 1;
             while (entryPoint + dataSearchLength < EndPosition)
@@ -319,15 +396,15 @@ namespace File_Split_and_Join
         }
 
         /// <summary>
-        /// 
+        /// Создать файл из нескольких "склеив" их последовательно один за одним
         /// </summary>
-        /// <param name="files"></param>
-        /// <param name="fileNameSave"></param>
-        public void JoinFiles(string[] files, string fileNameSave)
+        /// <param name="files">Файлы, которые требуется "склеить"</param>
+        /// <param name="fileNameSave">Путь/Имя нового файла, который получиться путём объединения других файлов</param>
+        public static void JoinFiles(string[] files, string fileNameSave)
         {
             FileStream stream_w = new FileStream(fileNameSave, FileMode.Create);
             BinaryWriter binary_w = new BinaryWriter(stream_w);
-            this._PreDefinedBuferSize = 1024 * 64;
+            int BuferSize = 1024 * 64;
             //
             FileStream stream_r;
             BinaryReader binary_r;
@@ -342,9 +419,9 @@ namespace File_Split_and_Join
                 int SizePartData = 0;
                 while (startPointRead < endPointRead)
                 {
-                    if (endPointRead - startPointRead > _PreDefinedBuferSize)
+                    if (endPointRead - startPointRead > BuferSize)
                     {
-                        SizePartData = _PreDefinedBuferSize;
+                        SizePartData = BuferSize;
                     }
                     else
                     {
