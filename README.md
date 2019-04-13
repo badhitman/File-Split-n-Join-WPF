@@ -2,7 +2,8 @@
 Нарезка файлов
 ```C#
 SplitAndJoinFile split = new SplitAndJoinFile(Encoding.UTF8);
-// открываем файл для чтения. В примере файл лежит по адресу [C:\test.txt] с текстом [000 ABC 111 Abc 222 AbC 333 aBC 444 abC 555abc666aBc777zxy888AAA999] без фигурных скобок
+// открываем файл для чтения. В примере файл лежит по адресу [C:\test.txt]
+// В файл записан текст [000 ABC 111 Abc 222 AbC 333 aBC 444 abC 555abc666aBc777zxy888AAA999] без скобок
 split.OpenFile(@"C:\test.txt");
 // Поиск вхождений по одному
 long index_detect_find_data = split.FindData("abc", true, 0); // 4
