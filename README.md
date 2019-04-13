@@ -14,6 +14,6 @@ index_detect_find_data = split.FindData("AbC", ignore_case: true, StartPosition:
 // Поиск сразу всех вхождений. Полное сканирование файла
 long[] indexes_detect_find_data = split.FindDataAll("abc", ignore_case: false, StartPosition: 0); // поиск всех вхождений строки в режиме [Учитывать регистр]. Результат поиска: массив индексов - [43]
 indexes_detect_find_data = split.FindDataAll("abc", ignore_case: true, StartPosition: 0); // поиск всех вхождений строки в режиме [игнорировать регистр]. Результат поиска: массив индексов - [4, 12, 20, 28, 36, 43, 49]
-// Не забываем закрыьб файл
+// Не забываем закрыть файл
 split.CloseFile();
 ```
