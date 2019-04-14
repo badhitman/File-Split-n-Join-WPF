@@ -3,6 +3,7 @@
 ```C#
 // Конструктору передаём режим кодировки файлов. Можно изменить в дальнейшем через метод SetEncoding
 SplitAndJoinFile split = new SplitAndJoinFile(Encoding.UTF8);
+
 // открываем файл для чтения. В примере файл лежит по адресу [C:\test.txt]
 // В файл записан текст [000 ABC 111 Abc 222 AbC 333 aBC 444 abC 555abc666aBc777zxy888AAA999] без скобок
 split.OpenFile(@"C:\test.txt");
