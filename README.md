@@ -1,5 +1,5 @@
 # File-Split-n-Join
-Нарезка файлов
+Поиск данных в файле. Нарезка файлов по размеру или по искомой строке.
 ```C#
 // Конструктору передаём режим кодировки файлов. Можно изменить в дальнейшем через метод SetEncoding
 SplitAndJoinFile split = new SplitAndJoinFile(Encoding.UTF8);
@@ -30,8 +30,6 @@ long[] indexes_detect_find_data = split.FindDataAll("abc", false,  0); // Рез
 // поиск всех вхождений строки в режиме [игнорировать регистр].
 indexes_detect_find_data = split.FindDataAll("abc", true, 0); // Результат поиска: массив индексов - [4, 12, 20, 28, 36, 43, 49]
 
-split.OpenFile(@"C:\Users\user\AppData\Local\Temp\2019-04-10_13-38-35_863a4c2600544c65b16f26199339a282.tmp.http.post");
-indexes_detect_find_data = split.FindDataAll("-----------------------------180702200020546", false, 0);
 // Не забываем закрыьб файл
 split.CloseFile();
 ```
