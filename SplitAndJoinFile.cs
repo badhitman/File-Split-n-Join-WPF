@@ -280,50 +280,44 @@ namespace SplitterJoinerFileCore
         /// <param name="PointEnd">Точка, до которой нужно копировать данные в новый файл</param>
         /// <param name="destFolder">Папка назначения нового файла</param>
         /// <param name="newFileName">Имя нового файла в папке назначения</param>
-        public void ExtractData(long PointStart, long PointEnd, string destFolder, string newFileName)
+        public void CopyData(long StartPosition, long EndPosition, string destFolder, string newFileName)
         {
-            /*long SizeData = PointEnd - PointStart;
+            // Запоминаем позицию курсора в файле, что бы потом вернуть его на место
+            long current_position_of_stream = Position;
+            //
+            if (StartPosition < 0)
+                StartPosition = 0;
+
+            if (EndPosition > Length)
+                EndPosition = Length;
+
+            if (Length < 1 || StartPosition >= EndPosition)
+                return;
 
             if (!Directory.Exists(destFolder))
                 Directory.CreateDirectory(destFolder);
 
-            byte[] wdata = new byte[] { };
-            fs_out = new FileStream(destFolder + "\\" + newFileName, FileMode.Create);
-            bin_writ = new BinaryWriter(this.fs_out);
+            fs_out = new FileStream(Path.Combine(destFolder, newFileName), FileMode.Create);
 
             int markerFlush = 0;
             long ActualPoint = 0;
-            while (SizeData > 0)
+            Position = StartPosition;
+            while (Position <= EndPosition)
             {
-
-                if (SizeData > BuferSize)
-                {
-                    ActualPoint = PointStart + BuferSize;
-                    bin_writ.Write(ReadBytes(PointStart, PointStart + BuferSize));
-                    PointStart += BuferSize;
-                    SizeData -= BuferSize;
-                }
-                else
-                {
-                    ActualPoint = PointStart + SizeData;
-                    bin_writ.Write(ReadBytes(PointStart, PointStart + SizeData));
-                    break;
-                }
-
+                fs_out.WriteByte((byte)fs_read.ReadByte());
+                
                 markerFlush++;
                 if (markerFlush >= 20)
                 {
-                    bin_writ.Flush();
                     fs_out.Flush();
                     markerFlush = 0;
-                    ProgressValueChange?.Invoke(((int)(ActualPoint / (fs_in.Length / 100))));
-                    //_win.Dispatcher.Invoke(new Action(() => ProgressBarValueChanged(((int)(ActualPoint / (fs_in.Length / 100))), _win)));
+                    ProgressValueChange?.Invoke(((int)(ActualPoint / (Length / 100))));
                 }
             }
-            ProgressValueChange?.Invoke(((int)(ActualPoint / (fs_in.Length / 100))));
-            //_win.Dispatcher.Invoke(new Action(() => ProgressBarValueChanged(((int)(ActualPoint / (fs_in.Length / 100))), _win)));
-            bin_writ.Close();
-            fs_out.Close();*/
+            ProgressValueChange?.Invoke(((int)(ActualPoint / (Length / 100))));
+            
+            fs_out.Close();
+            Position = current_position_of_stream;
         }
 
         /// <summary>
@@ -342,17 +336,17 @@ namespace SplitterJoinerFileCore
             while (StartPosition + size * repeatEvery < EndPosition)
             {
                 partFile++;
-                ExtractData(StartPosition, StartPosition + size * repeatEvery, destFolder, strNewFileNames + ".part_" + partFile.ToString());
+                CopyData(StartPosition, StartPosition + size * repeatEvery, destFolder, strNewFileNames + ".part_" + partFile.ToString());
                 StartPosition += size * repeatEvery;
                 if (!repeat)
                 {
-                    ExtractData(StartPosition, EndPosition, destFolder, strNewFileNames + ".part_" + (partFile + 1).ToString());
+                    CopyData(StartPosition, EndPosition, destFolder, strNewFileNames + ".part_" + (partFile + 1).ToString());
                     return;
                 }
             }
             if (StartPosition < EndPosition)
             {
-                ExtractData(StartPosition, EndPosition, destFolder, strNewFileNames + ".part_" + (partFile + 1).ToString());
+                CopyData(StartPosition, EndPosition, destFolder, strNewFileNames + ".part_" + (partFile + 1).ToString());
             }
         }
 
@@ -385,13 +379,13 @@ namespace SplitterJoinerFileCore
                         break;
                 }
                 partFile++;
-                ExtractData(StartPosition, entryPoint, destFolder, strNewFileNames + ".part_" + partFile.ToString());
+                CopyData(StartPosition, entryPoint, destFolder, strNewFileNames + ".part_" + partFile.ToString());
                 countEvery = repeatEvery;
                 StartPosition = entryPoint;
             }
             if (StartPosition < entryPoint)
             {
-                ExtractData(StartPosition, entryPoint, destFolder, strNewFileNames + ".part_" + (partFile + 1).ToString());
+                CopyData(StartPosition, entryPoint, destFolder, strNewFileNames + ".part_" + (partFile + 1).ToString());
             }
         }
 
