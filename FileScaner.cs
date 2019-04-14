@@ -1,6 +1,7 @@
 ﻿////////////////////////////////////////////////
 // © https://github.com/badhitman 
 ////////////////////////////////////////////////
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -27,6 +28,18 @@ namespace FileManager
                     result_bytes[i] = new byte[] { EncodingMode.GetBytes(s)[0] };
             }
             return result_bytes;
+        }
+
+        public static byte[][] HexToByte(string s)
+        {
+            byte[] original_bytes = s.Split('-').Select(b => Convert.ToByte(b, 16)).ToArray();
+            byte[][] search_data = new byte[original_bytes.Length][];
+            int original_bytes_length = original_bytes.Length;
+
+            for (int i = 0; i < original_bytes_length; i++)
+                search_data[i] = new byte[] { original_bytes[i] };
+
+            return search_data;
         }
 
         #region FindDataAll by byte[][] or string
