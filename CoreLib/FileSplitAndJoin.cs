@@ -19,17 +19,17 @@ namespace FileManager
             while (StartPosition + size * repeatEvery < EndPosition)
             {
                 partFile++;
-                CopyData(StartPosition, StartPosition + size * repeatEvery, destFolder, strNewFileNames + ".part_" + partFile.ToString());
+                CopyData(StartPosition, StartPosition + size * repeatEvery, Path.Combine(destFolder, strNewFileNames + ".part_" + partFile.ToString()));
                 StartPosition += size * repeatEvery;
                 if (!repeat)
                 {
-                    CopyData(StartPosition, EndPosition, destFolder, strNewFileNames + ".part_" + (partFile + 1).ToString());
+                    CopyData(StartPosition, EndPosition, Path.Combine(destFolder, strNewFileNames + ".part_" + (partFile + 1).ToString()));
                     return;
                 }
             }
             if (StartPosition < EndPosition)
             {
-                CopyData(StartPosition, EndPosition, destFolder, strNewFileNames + ".part_" + (partFile + 1).ToString());
+                CopyData(StartPosition, EndPosition, Path.Combine(destFolder, strNewFileNames + ".part_" + (partFile + 1).ToString()));
             }
         }
 
@@ -62,13 +62,13 @@ namespace FileManager
                         break;
                 }
                 partFile++;
-                CopyData(StartPosition, entryPoint, destFolder, strNewFileNames + ".part_" + partFile.ToString());
+                CopyData(StartPosition, entryPoint, Path.Combine(destFolder, strNewFileNames + ".part_" + partFile.ToString()));
                 countEvery = repeatEvery;
                 StartPosition = entryPoint;
             }
             if (StartPosition < entryPoint)
             {
-                CopyData(StartPosition, entryPoint, destFolder, strNewFileNames + ".part_" + (partFile + 1).ToString());
+                CopyData(StartPosition, entryPoint, Path.Combine(destFolder, strNewFileNames + ".part_" + (partFile + 1).ToString()));
             }
         }
     }

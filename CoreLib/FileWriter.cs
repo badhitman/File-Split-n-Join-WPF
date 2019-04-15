@@ -24,9 +24,7 @@ namespace FileManager
         /// </summary>
         /// <param name="PointStart">Точка, с которой нужно копировать данные в новый файл</param>
         /// <param name="PointEnd">Точка, до которой нужно копировать данные в новый файл</param>
-        /// <param name="destFolder">Папка назначения нового файла</param>
-        /// <param name="newFileName">Имя нового файла в папке назначения</param>
-        public void CopyData(long StartPosition, long EndPosition, string destFolder, string newFileName)
+        public void CopyData(long StartPosition, long EndPosition, string destFileName)
         {
             // Запоминаем позицию курсора в файле, что бы потом вернуть его на место
             long current_position_of_stream = Position;
@@ -40,10 +38,10 @@ namespace FileManager
             if (Length < 1 || StartPosition >= EndPosition)
                 return;
 
-            if (!Directory.Exists(destFolder))
-                Directory.CreateDirectory(destFolder);
+            if (!Directory.Exists(Path.GetDirectoryName(destFileName)))
+                Directory.CreateDirectory(destFileName);
 
-            FileWriteStream = new FileStream(Path.Combine(destFolder, newFileName), FileMode.Create);
+            FileWriteStream = new FileStream(destFileName, FileMode.Create);
 
             int markerFlush = 0;
             long ActualPoint = 0;
