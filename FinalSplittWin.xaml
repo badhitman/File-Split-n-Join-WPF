@@ -6,8 +6,7 @@
         <TaskbarItemInfo ProgressState="Normal" />
     </Window.TaskbarItemInfo>
     <Grid>
-        <CheckBox x:Name="everyCut" Content="{DynamicResource CheckBoxSectionEvery}" ToolTip="{DynamicResource CheckBoxSectionEveryToolTip}" HorizontalAlignment="Right" Margin="0,47,12,0" VerticalAlignment="Top" Foreground="DarkGreen" Click="repeatCut_Click"/>
-        <TextBox Tag="1" x:Name="wathRepeat" ToolTip="{DynamicResource TextBoxWathRepeatToolTip}" HorizontalAlignment="Right" Height="22" Margin="0,64,12,0" TextWrapping="Wrap" Text="1" VerticalAlignment="Top" Width="80" TextAlignment="Right" IsEnabled="False" TextChanged="wathRepeat_TextChanged" MouseWheel="wathRepeat_MouseWheel"/>
+        <TextBox Tag="1" x:Name="dimension_group" ToolTip="{DynamicResource TextBoxWathRepeatToolTip}" HorizontalAlignment="Right" Height="22" Margin="0,64,12,0" TextWrapping="Wrap" Text="1" VerticalAlignment="Top" Width="80" TextAlignment="Right" TextChanged="wathRepeat_TextChanged" MouseWheel="wathRepeat_MouseWheel"/>
 
         <TextBox x:Name="DestinationFolderTextBox" Height="26" Margin="9,10,135,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" IsReadOnly="True" Background="#FFECE6E6" BorderBrush="Black"/>
         <Button x:Name="DestinationButtonSelect" Content="{DynamicResource ButtonDestinationFolder}" Height="26" Margin="0,10,10,0" VerticalAlignment="Top" Click="Button_Click" HorizontalAlignment="Right" Width="120"/>

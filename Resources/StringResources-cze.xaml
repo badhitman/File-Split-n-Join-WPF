@@ -52,8 +52,6 @@
     <system:String x:Key="LabelSplitMode">Režim řezání:</system:String>
     <system:String x:Key="LabelSplitModeToolTip">Řezací režim souboru: [size] - velikost, [text] - Text</system:String>
     <system:String x:Key="LabelSplitOf">Řezání podle:</system:String>
-    <system:String x:Key="CheckBoxSectionEvery">Loop / opakované řezy souboru</system:String>
-    <system:String x:Key="CheckBoxSectionEveryToolTip">Pokud je přepínač vypnut, bude vytvořit dva soubory: jeden - v místě řezu, 2 - zbytek. Pokud je povolena spínač, pak se celý soubor nakrájené na kousky</system:String>
     <system:String x:Key="TextBoxWathRepeatToolTip">Pokud je nastavena na hodnotu 1, bude soubor plátky ve stejných podílech. Je-li více než 1, bude každá část souboru obsahuje sadu množství fragmentů</system:String>
     <system:String x:Key="MessError">Chyba</system:String>
     <system:String x:Key="MessSpecifyDestinationFolder">Zadejte cílovou složku / obchod</system:String>

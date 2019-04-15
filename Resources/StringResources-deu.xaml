@@ -52,8 +52,6 @@
     <system:String x:Key="LabelSplitMode">Split-Modus:</system:String>
     <system:String x:Key="LabelSplitModeToolTip">Schneidemodus Datei: [size] - Größe, [text] - Text</system:String>
     <system:String x:Key="LabelSplitOf">Spaltung der:</system:String>
-    <system:String x:Key="CheckBoxSectionEvery">Loop / Kettenschnitte durch die Datei</system:String>
-    <system:String x:Key="CheckBoxSectionEveryToolTip">Wenn der Schalter ausgeschaltet ist, werden Sie zwei Dateien zu erstellen: 1 - an der Stelle des Schnittes, 2 - den Rest erledigen. Wenn der Schalter eingeschaltet ist, dann wird die gesamte Datei in Stücke geschnitten werden</system:String>
     <system:String x:Key="TextBoxWathRepeatToolTip">Wenn auf 1 gesetzt, wird die Datei in gleiche Anteile in Scheiben geschnitten werden. Wenn mehr als 1, wird jeder Teil einer Datei die eingestellte Menge Fragmente enthalten</system:String>
     <system:String x:Key="MessError">Fehler</system:String>
     <system:String x:Key="MessSpecifyDestinationFolder">Geben Sie den Zielordner/Store</system:String>

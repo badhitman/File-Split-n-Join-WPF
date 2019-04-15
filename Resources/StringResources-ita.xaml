@@ -52,8 +52,6 @@
     <system:String x:Key="LabelSplitMode">Modalità di taglio:</system:String>
     <system:String x:Key="LabelSplitModeToolTip">Taglio di file del modo: [size] - dimensioni, [testo] - testo</system:String>
     <system:String x:Key="LabelSplitOf">Taglio da:</system:String>
-    <system:String x:Key="CheckBoxSectionEvery">Tagli Loop / ripetizione attraverso il file</system:String>
-    <system:String x:Key="CheckBoxSectionEveryToolTip">Quando l'interruttore è spento, verranno creati due file: 1 - presso il punto di incisione, 2 - il resto. Se l'interruttore è attivato, quindi l'intero file viene tagliata a pezzi</system:String>
     <system:String x:Key="TextBoxWathRepeatToolTip">Se impostato su 1, il file verrà tagliata a parità di aliquote. Se più di 1, ogni parte di un file conterrà la quantità impostata di frammenti</system:String>
     <system:String x:Key="MessError">Errore</system:String>
     <system:String x:Key="MessSpecifyDestinationFolder">Specificare la cartella / negozio di destinazione</system:String>

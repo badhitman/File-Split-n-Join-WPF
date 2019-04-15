@@ -52,8 +52,6 @@
     <system:String x:Key="LabelSplitMode">Split mode: </system:String>
     <system:String x:Key="LabelSplitModeToolTip">Cutting mode file: [size] - of size, [text] - of text</system:String>
     <system:String x:Key="LabelSplitOf">Split of:</system:String>
-    <system:String x:Key="CheckBoxSectionEvery">Section repeat/through every</system:String>
-    <system:String x:Key="CheckBoxSectionEveryToolTip">When the switch is turned off, you will create two files: 1 - at the point of incision, 2 - the rest. If the switch is enabled, then the entire file is sliced ​​into pieces</system:String>
     <system:String x:Key="TextBoxWathRepeatToolTip">If set to 1, the file will be sliced ​​in equal aliquots. If more than 1, each part of a file will contain the set amount of fragments</system:String>
     <system:String x:Key="MessError">Error</system:String>
     <system:String x:Key="MessSpecifyDestinationFolder">Specify the destination folder</system:String>

@@ -46,7 +46,7 @@ namespace FileManager
             int markerFlush = 0;
             long ActualPoint = 0;
             Position = StartPosition;
-            while (Position <= EndPosition)
+            while (Position < EndPosition)
             {
                 FileWriteStream.WriteByte((byte)FileReadStream.ReadByte());
 

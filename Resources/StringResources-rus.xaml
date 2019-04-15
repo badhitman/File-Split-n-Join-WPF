@@ -52,8 +52,6 @@
     <system:String x:Key="LabelSplitMode">Режим нарезки:</system:String>
     <system:String x:Key="LabelSplitModeToolTip">Режим нарезки файла: [size] - по размеру, [text] - по тексту</system:String>
     <system:String x:Key="LabelSplitOf">Нарезка по:</system:String>
-    <system:String x:Key="CheckBoxSectionEvery">Зациклить/повторять нарезку по всему файлу</system:String>
-    <system:String x:Key="CheckBoxSectionEveryToolTip">Если переключатель выключен, то будут созданы два файла: 1 - в точке разреза, 2 - остальная часть. Если переключатель включён, то весь файл будет нарезан на части</system:String>
     <system:String x:Key="TextBoxWathRepeatToolTip">Если установлено 1, то файл будет нарезан равными кратными частями. Если больше 1, то каждая часть файла будет содержать установленное количество фрагментов</system:String>
     <system:String x:Key="MessError">Ошибка</system:String>
     <system:String x:Key="MessSpecifyDestinationFolder">Укажите папку назначения/сохранения</system:String>

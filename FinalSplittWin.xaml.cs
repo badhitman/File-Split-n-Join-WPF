@@ -18,10 +18,10 @@ namespace FileSplitAndJoinWPF
     /// </summary>
     public partial class FinalSplitWin : Window
     {
-        public delegate void SplitFileOfSizeDelegate(string destFolder, long size, bool repeat = false, int repeatEvery = 1);
+        public delegate void SplitFileOfSizeDelegate(string destFolder, long size, int repeatEvery = 1);
         //public SplitFileOfSizeDelegate SplitFileOfSizeDelegateObj;
 
-        public delegate void SplitFileOfDataDelegate(string destFolder, byte[][] dataSearch, bool repeat = false, int repeatEvery = 1);
+        public delegate void SplitFileOfDataDelegate(string destFolder, byte[][] dataSearch, int repeatEvery = 1);
         //public SplitFileOfDataDelegate SplitFileOfDataDelegateObj;
 
         private Dictionary<Options, string> myOptions = new Dictionary<Options, string>();
@@ -49,36 +49,18 @@ namespace FileSplitAndJoinWPF
         }
 
         /// <summary>
-        /// Событие переключения чекбокса режима компановки совпадений поиска. 
-        /// </summary>
-        private void repeatCut_Click(object sender, RoutedEventArgs e)
-        {
-            if (everyCut.IsChecked.Value)
-            {
-                wathRepeat.IsEnabled = true;
-                wathRepeat.Text = wathRepeat.Tag.ToString();
-            }
-            else
-            {
-                wathRepeat.Tag = wathRepeat.Text;
-                wathRepeat.Text = "1";
-                wathRepeat.IsEnabled = false;
-            }
-        }
-
-        /// <summary>
         /// Событие изменения размера компановки.
         /// </summary>
         private void wathRepeat_TextChanged(object sender, TextChangedEventArgs e)
         {
-            if (!System.Text.RegularExpressions.Regex.IsMatch(wathRepeat.Text.ToString(), @"^[1-9]+\d*$"))
+            if (!System.Text.RegularExpressions.Regex.IsMatch(dimension_group.Text.ToString(), @"^[1-9]+\d*$"))
             {
-                wathRepeat.Text = wathRepeat.Tag.ToString();
-                wathRepeat.Select(wathRepeat.Text.Length, 0);
+                dimension_group.Text = dimension_group.Tag.ToString();
+                dimension_group.Select(dimension_group.Text.Length, 0);
             }
             else
             {
-                wathRepeat.Tag = wathRepeat.Text;
+                dimension_group.Tag = dimension_group.Text;
             }
         }
 
@@ -112,7 +94,7 @@ namespace FileSplitAndJoinWPF
             string DestinationFolderTextBoxText = DestinationFolderTextBox.Text;
             ProgressBarSplitFile.Value = 0;
             if (myOptions[Options.Mode].ToLower() == "size")
-                new SplitFileOfSizeDelegate(g.FileManager.SplitFile).BeginInvoke(DestinationFolderTextBox.Text, Convert.ToInt64(myOptions[Options.extMode]), everyCut.IsChecked.Value, Convert.ToInt32(wathRepeat.Text), delegate { g.OpenFolder(DestinationFolderTextBoxText); }, null);
+                new SplitFileOfSizeDelegate(g.FileManager.SplitFile).BeginInvoke(DestinationFolderTextBox.Text, Convert.ToInt64(myOptions[Options.extMode]), Convert.ToInt32(dimension_group.Text), delegate { g.OpenFolder(DestinationFolderTextBoxText); }, null);
             else
             {
                 byte[][] dataSearch;
@@ -122,7 +104,7 @@ namespace FileSplitAndJoinWPF
                     dataSearch = FileScaner.StringToSearchBytes(myOptions[Options.extMode]);
 
                 g.FileManager.ProgressValueChange += FileManager_ProgressValueChange;
-                new SplitFileOfDataDelegate(g.FileManager.SplitFile).BeginInvoke(DestinationFolderTextBox.Text, dataSearch, everyCut.IsChecked.Value, Convert.ToInt32(wathRepeat.Text), delegate { g.OpenFolder(DestinationFolderTextBoxText); }, null);
+                new SplitFileOfDataDelegate(g.FileManager.SplitFile).BeginInvoke(DestinationFolderTextBox.Text, dataSearch, Convert.ToInt32(dimension_group.Text), delegate { g.OpenFolder(DestinationFolderTextBoxText); }, null);
             }
 
         }
@@ -145,13 +127,13 @@ namespace FileSplitAndJoinWPF
         /// </summary>
         private void wathRepeat_MouseWheel(object sender, MouseWheelEventArgs e)
         {
-            if (!wathRepeat.IsEnabled)
+            if (!dimension_group.IsEnabled)
                 return;
 
             if (e.Delta > 0)
-                wathRepeat.Text = (Convert.ToInt16(wathRepeat.Text) + 1).ToString();
+                dimension_group.Text = (Convert.ToInt16(dimension_group.Text) + 1).ToString();
             else
-                wathRepeat.Text = (Convert.ToInt16(wathRepeat.Text) - 1).ToString();
+                dimension_group.Text = (Convert.ToInt16(dimension_group.Text) - 1).ToString();
         }
 
 
@@ -166,10 +148,8 @@ namespace FileSplitAndJoinWPF
                 Dictionary<string, bool> save_state_form = new Dictionary<string, bool>();
                 save_state_form.Add(DestinationButtonSelect.Name, DestinationButtonSelect.IsEnabled);
                 DestinationButtonSelect.IsEnabled = false;
-                save_state_form.Add(everyCut.Name, everyCut.IsEnabled);
-                everyCut.IsEnabled = false;
-                save_state_form.Add(wathRepeat.Name, wathRepeat.IsEnabled);
-                wathRepeat.IsEnabled = false;
+                save_state_form.Add(dimension_group.Name, dimension_group.IsEnabled);
+                dimension_group.IsEnabled = false;
                 save_state_form.Add(CanselButton.Name, CanselButton.IsEnabled);
                 CanselButton.IsEnabled = false;
                 save_state_form.Add(StartButton.Name, StartButton.IsEnabled);
@@ -182,8 +162,7 @@ namespace FileSplitAndJoinWPF
                 // Восстанавливаем состояние элементов формы
                 Dictionary<string, bool> restore_state_form = (Dictionary<string, bool>)ProgressBarSplitFile.Tag;
                 DestinationButtonSelect.IsEnabled = restore_state_form[DestinationButtonSelect.Name];
-                everyCut.IsEnabled = restore_state_form[everyCut.Name];
-                wathRepeat.IsEnabled = restore_state_form[wathRepeat.Name];
+                dimension_group.IsEnabled = restore_state_form[dimension_group.Name];
                 CanselButton.IsEnabled = restore_state_form[CanselButton.Name];
                 StartButton.IsEnabled = restore_state_form[StartButton.Name];
                 ProgressBarSplitFile.Tag = null;

@@ -52,8 +52,6 @@
     <system:String x:Key="LabelSplitMode">切割方式：</system:String>
     <system:String x:Key="LabelSplitModeToolTip">切割模式文件：[尺寸] - 大小[文字] - 文本</system:String>
     <system:String x:Key="LabelSplitOf">切割方式：</system:String>
-    <system:String x:Key="CheckBoxSectionEvery">循環/重複切過的文件</system:String>
-    <system:String x:Key="CheckBoxSectionEveryToolTip">當開關斷開時，將創建兩個文件：1 - 在切口，2點 - 的其餘部分。如果開關被接通，然後將整個文件被切成碎片</system:String>
     <system:String x:Key="TextBoxWathRepeatToolTip">如果設置為1，則該文件將被切成相等的等分試樣。若大於1，一個文件的每個部分將包含片段的設置量</system:String>
     <system:String x:Key="MessError">錯誤</system:String>
     <system:String x:Key="MessSpecifyDestinationFolder">指定目標文件夾/商店</system:String>

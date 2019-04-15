@@ -21,9 +21,6 @@ namespace FileSplitAndJoinWPF
 
         public MainWindow()
         {
-            //FileManager.FileSplitAndJoin splitter = new FileManager.FileSplitAndJoin();
-            //splitter.OpenFile(@"C:\Users\user\AppData\Local\Temp\2019-04-10_13-38-35_863a4c2600544c65b16f26199339a282.tmp.http.post");
-            //long index_find = splitter.FindData("-----------------------------180702200020546", false, 0);
             InitializeComponent();
             g.myStartWin = this;
             //
