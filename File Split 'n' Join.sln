@@ -1,11 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.572
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29306.81
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "File Split 'n' Join", "File Split 'n' Join.csproj", "{AD9AA7B0-42ED-4D00-84CE-AA2EBA75BC58}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CoreLib", "CoreLib\CoreLib.csproj", "{7C3137E1-A161-4BB6-A6CB-BB9B925A8D52}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataFileScanerLib", "..\DataFileScanerLib\DataFileScanerLib.csproj", "{8553F3DB-64F6-4CD5-A50C-F474A2678237}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,10 +17,10 @@ Global
 		{AD9AA7B0-42ED-4D00-84CE-AA2EBA75BC58}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AD9AA7B0-42ED-4D00-84CE-AA2EBA75BC58}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AD9AA7B0-42ED-4D00-84CE-AA2EBA75BC58}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7C3137E1-A161-4BB6-A6CB-BB9B925A8D52}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7C3137E1-A161-4BB6-A6CB-BB9B925A8D52}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7C3137E1-A161-4BB6-A6CB-BB9B925A8D52}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7C3137E1-A161-4BB6-A6CB-BB9B925A8D52}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8553F3DB-64F6-4CD5-A50C-F474A2678237}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8553F3DB-64F6-4CD5-A50C-F474A2678237}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8553F3DB-64F6-4CD5-A50C-F474A2678237}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8553F3DB-64F6-4CD5-A50C-F474A2678237}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

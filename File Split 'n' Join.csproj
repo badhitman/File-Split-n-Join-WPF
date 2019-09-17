@@ -217,9 +217,9 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="CoreLib\CoreLib.csproj">
-      <Project>{7c3137e1-a161-4bb6-a6cb-bb9b925a8d52}</Project>
-      <Name>CoreLib</Name>
+    <ProjectReference Include="..\DataFileScanerLib\DataFileScanerLib.csproj">
+      <Project>{8553f3db-64f6-4cd5-a50c-f474a2678237}</Project>
+      <Name>DataFileScanerLib</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
