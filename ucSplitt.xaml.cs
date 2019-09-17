@@ -140,7 +140,7 @@ namespace FileSplitAndJoinWPF
             MenuItem Item = (MenuItem)sender;
             if (e != null)
             {
-                currentFormatResult = Item.Tag.ToString();
+                currentFormatResult = Item.Tag?.ToString();
                 new ModifyRegistry().Write("display_format", currentFormatResult);
                 g.FileManager?.SetEncoding(currentFormatResult);
             }
@@ -230,7 +230,7 @@ namespace FileSplitAndJoinWPF
 
             string StartData;
             string EndData;
-            switch (currentFormatResult.ToLower())
+            switch (currentFormatResult?.ToLower())
             {
                 case "hex":
                     StartData = FileReader.BytesToHEX(showData[ReadingDirection.Left]);
