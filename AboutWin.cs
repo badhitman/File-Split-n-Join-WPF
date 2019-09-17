@@ -1,10 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
-using System.Linq;
 using System.Reflection;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace FileSplitAndJoinWPF
@@ -14,12 +9,11 @@ namespace FileSplitAndJoinWPF
         public AboutWin()
         {
             InitializeComponent();
-            this.Text = String.Format("О программе {0}", AssemblyTitle);
-            this.labelProductName.Text = AssemblyProduct;
-            this.labelVersion.Text = String.Format("Версия {0}", AssemblyVersion);
-            this.labelCopyright.Text = AssemblyCopyright;
-            this.labelCompanyName.Text = AssemblyCompany;
-            this.textBoxDescription.Text = AssemblyDescription;
+            Text = string.Format("О программе {0}", AssemblyTitle);
+            labelProductName.Text = AssemblyProduct;
+            labelVersion.Text = string.Format("Версия {0}", AssemblyVersion);
+            labelCopyright.Text = AssemblyCopyright;
+            textBoxDescription.Text = AssemblyDescription;
         }
 
         #region Методы доступа к атрибутам сборки
@@ -104,12 +98,7 @@ namespace FileSplitAndJoinWPF
 
         private void labelCopyright_Click(object sender, EventArgs e)
         {
-            System.Diagnostics.Process.Start("http://vk.com/id266506098");
-        }
-
-        private void labelCompanyName_Click(object sender, EventArgs e)
-        {
-            System.Diagnostics.Process.Start("https://sourceforge.net/projects/files-splitter/");
+            System.Diagnostics.Process.Start("https://github.com/badhitman");
         }
     }
 }
