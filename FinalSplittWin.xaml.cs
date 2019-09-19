@@ -1,7 +1,7 @@
 ﻿////////////////////////////////////////////////
 // © https://github.com/badhitman 
 ////////////////////////////////////////////////
-using FileManager;
+using DataFileScanerLib;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -99,9 +99,9 @@ namespace FileSplitAndJoinWPF
             {
                 byte[][] dataSearch;
                 if (((ucSplit)this.Tag).currentFormatResult.ToLower() == "hex")
-                    dataSearch = FileScaner.HexToByte(myOptions[Options.extMode]);
+                    dataSearch = FileScanner.HexToByte(myOptions[Options.extMode]);
                 else
-                    dataSearch = FileScaner.StringToSearchBytes(myOptions[Options.extMode]);
+                    dataSearch = FileScanner.StringToSearchBytes(myOptions[Options.extMode]);
 
                 g.FileManager.ProgressValueChange += FileManager_ProgressValueChange;
                 new SplitFileOfDataDelegate(g.FileManager.SplitFile).BeginInvoke(DestinationFolderTextBox.Text, dataSearch, Convert.ToInt32(dimension_group.Text), delegate { g.OpenFolder(DestinationFolderTextBoxText); }, null);

@@ -1,7 +1,7 @@
 ﻿////////////////////////////////////////////////
 // © https://github.com/badhitman 
 ////////////////////////////////////////////////
-using FileManager;
+using DataFileScanerLib;
 using FileSplitAndJoinWin32;
 using Microsoft.Win32;
 using System;
@@ -339,9 +339,9 @@ namespace FileSplitAndJoinWPF
             byte[][] searchData;
 
             if (currentFormatResult.ToLower() == "hex")
-                searchData = FileScaner.HexToByte(CutTextBox.Text);
+                searchData = FileScanner.HexToByte(CutTextBox.Text);
             else
-                searchData = FileScaner.StringToSearchBytes(CutTextBox.Text);
+                searchData = FileScanner.StringToSearchBytes(CutTextBox.Text);
 
             long index_detect_find_data = -1;
             if (SliderSizeManage.Tag is null)

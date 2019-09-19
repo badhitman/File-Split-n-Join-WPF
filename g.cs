@@ -1,6 +1,7 @@
 ﻿////////////////////////////////////////////////
 // © https://github.com/badhitman 
 ////////////////////////////////////////////////
+using DataFileScanerLib;
 using System;
 using System.Windows;
 
@@ -10,7 +11,7 @@ namespace FileSplitAndJoinWPF
     {
         public static MainWindow myStartWin;
         public static int CacheSize = 1024;
-        public static FileManager.FileSplitAndJoin FileManager = new FileManager.FileSplitAndJoin();
+        public static FileSplitAndJoin FileManager = new FileSplitAndJoin();
         public static void OpenFolder(string PathFolder)
         {
             string windir = Environment.GetEnvironmentVariable("WINDIR");

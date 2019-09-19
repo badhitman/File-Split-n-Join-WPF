@@ -189,7 +189,7 @@ namespace FileSplitAndJoinWPF
                 foreach (FileForJoin item in ListViewFiles.Items)
                     files[index++] = item.Name;
 
-                FileManager.FileWriter.JoinFiles(files, saveFileDialog1.FileName);
+                DataFileScanerLib.FileWriter.JoinFiles(files, saveFileDialog1.FileName);
                 g.OpenFolder(Path.GetDirectoryName(saveFileDialog1.FileName));
             }
         }
