@@ -1,17 +1,17 @@
 ﻿////////////////////////////////////////////////
 // © https://github.com/badhitman 
 ////////////////////////////////////////////////
-using DataFileScanerLib;
 using System;
 using System.Windows;
+using TextFileScanerLib;
 
 namespace FileSplitAndJoinWPF
 {
     public static class g
     {
-        public static MainWindow myStartWin;
-        public static int CacheSize = 1024;
-        public static FileSplitAndJoin FileManager = new FileSplitAndJoin();
+        public static MainWindow myStartWin { get; set; }
+        public static int CacheSize { get; set; } = 1024;
+        public static FileSplitAndJoin FileManager { get; set; } = new FileSplitAndJoin();
         public static void OpenFolder(string PathFolder)
         {
             string windir = Environment.GetEnvironmentVariable("WINDIR");
@@ -21,9 +21,9 @@ namespace FileSplitAndJoinWPF
             prc.Start();
         }
         /////////////////////////////////////////
-        public static System.Collections.ArrayList errorListCalculator;
-        public static string resultCalculator;
-        public static string last_lang_programm = "eng";
-        public static ResourceDictionary dict;
+        public static System.Collections.ArrayList errorListCalculator { get; set; }
+        public static string resultCalculator { get; set; }
+        public static string last_lang_programm { get; set; } = "eng";
+        public static ResourceDictionary Dict { get; set; }
     }
 }

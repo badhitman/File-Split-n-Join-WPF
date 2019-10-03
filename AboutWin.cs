@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Reflection;
 using System.Windows.Forms;
 
@@ -9,9 +10,9 @@ namespace FileSplitAndJoinWPF
         public AboutWin()
         {
             InitializeComponent();
-            Text = string.Format("О программе {0}", AssemblyTitle);
+            Text = string.Format(CultureInfo.CurrentCulture, "О программе {0}", AssemblyTitle);
             labelProductName.Text = AssemblyProduct;
-            labelVersion.Text = string.Format("Версия {0}", AssemblyVersion);
+            labelVersion.Text = string.Format(CultureInfo.CurrentCulture, "Версия {0}", AssemblyVersion);
             labelCopyright.Text = AssemblyCopyright;
             textBoxDescription.Text = AssemblyDescription;
         }
@@ -26,7 +27,7 @@ namespace FileSplitAndJoinWPF
                 if (attributes.Length > 0)
                 {
                     AssemblyTitleAttribute titleAttribute = (AssemblyTitleAttribute)attributes[0];
-                    if (titleAttribute.Title != "")
+                    if (titleAttribute.Title.Length > 0)
                     {
                         return titleAttribute.Title;
                     }

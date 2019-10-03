@@ -1,17 +1,20 @@
 ﻿////////////////////////////////////////////////
 // © https://github.com/badhitman 
 ////////////////////////////////////////////////
-using DataFileScanerLib;
 using FileSplitAndJoinWin32;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
+using TextFileScanerLib;
+using TextFileScanerLib.Matches;
+using TextFileScanerLib.scan.matches;
 
 namespace FileSplitAndJoinWPF
 {
@@ -19,11 +22,11 @@ namespace FileSplitAndJoinWPF
     /// <summary>
     /// Логика взаимодействия для SplitUC.xaml
     /// </summary>
-    public partial class ucSplit : UserControl
+    public partial class UcSplit : UserControl
     {
-        public string currentFormatResult = "";
+        public string currentFormatResult { get; set; } = "";
 
-        public ucSplit()
+        public UcSplit()
         {
             InitializeComponent();
         }
@@ -31,10 +34,10 @@ namespace FileSplitAndJoinWPF
         /// <summary>
         /// Установить язык интерфейса
         /// </summary>
-        public void Set_lng()
+        public void SetLng()
         {
             Resources.MergedDictionaries.Clear();
-            Resources.MergedDictionaries.Add(g.dict);
+            Resources.MergedDictionaries.Add(g.Dict);
         }
 
         /// <summary>
@@ -126,7 +129,7 @@ namespace FileSplitAndJoinWPF
         /// </summary>
         private void MenuItemFindPointCutText_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            if (isModeOfSize.IsChecked.Value || CutTextBox.Text.Trim() == "" || SliderSizeManage.Maximum == 0)
+            if (isModeOfSize.IsChecked.Value || CutTextBox.Text.Trim().Length==0 || SliderSizeManage.Maximum == 0)
                 MenuItemFindPointCutText.IsEnabled = false;
             else
                 MenuItemFindPointCutText.IsEnabled = true;
@@ -142,7 +145,7 @@ namespace FileSplitAndJoinWPF
             {
                 currentFormatResult = Item.Tag?.ToString();
                 new ModifyRegistry().Write("display_format", currentFormatResult);
-                g.FileManager?.SetEncoding(currentFormatResult);
+                AdapterFileReader.SetEncoding(currentFormatResult);
             }
             Item.Background = Brushes.PaleGoldenrod;
             Item.BorderBrush = Brushes.Red;
@@ -163,7 +166,7 @@ namespace FileSplitAndJoinWPF
                     }
                 }
             }
-            SliderFile_ValueChanged(null, null);
+            SliderFileValueChanged(null, null);
         }
 
         /// <summary>
@@ -179,7 +182,7 @@ namespace FileSplitAndJoinWPF
                 else
                     continue;
 
-                li.IsEnabled = Convert.ToDouble(li.Tag) < SliderSizeManage.Maximum;
+                li.IsEnabled = Convert.ToDouble(li.Tag, CultureInfo.CurrentCulture) < SliderSizeManage.Maximum;
             }
         }
 
@@ -188,12 +191,14 @@ namespace FileSplitAndJoinWPF
         /// </summary>
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            OpenFileDialog openFileDialog1 = new OpenFileDialog();
-            // Set filter options and filter index.
-            openFileDialog1.Filter = "All Files (*.*)|*.*|Text Files (.txt)|*.txt";
-            openFileDialog1.FilterIndex = 1;
-            openFileDialog1.CheckPathExists = true;
-            openFileDialog1.Multiselect = false;
+            OpenFileDialog openFileDialog1 = new OpenFileDialog
+            {
+                // Set filter options and filter index.
+                Filter = "All Files (*.*)|*.*|Text Files (.txt)|*.txt",
+                FilterIndex = 1,
+                CheckPathExists = true,
+                Multiselect = false
+            };
 
             // Call the ShowDialog method to show the dialog box.
             bool? userClickedOK = openFileDialog1.ShowDialog();
@@ -203,18 +208,18 @@ namespace FileSplitAndJoinWPF
             {
                 PathFile.Text = openFileDialog1.FileName;
                 new ModifyRegistry().Write("last_read_file", PathFile.Text.Trim());
-                g.FileManager.SetEncoding(currentFormatResult);
+                AdapterFileReader.SetEncoding(currentFormatResult);
                 g.FileManager.OpenFile(openFileDialog1.FileName);
                 SliderSizeManage.Maximum = g.FileManager.Length;
                 SliderSizeManage.Value = 0;
-                SliderFile_ValueChanged(null, null);
+                SliderFileValueChanged(null, null);
             }
         }
 
         /// <summary>
         /// Событие перемещения ползунка изменения позиции курсора в файле
         /// </summary>
-        public void SliderFile_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        public void SliderFileValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if (!(sender is null || e is null))
                 SliderSizeManage.Tag = null;
@@ -223,111 +228,109 @@ namespace FileSplitAndJoinWPF
                 return;
 
             double percent = SliderSizeManage.Value / (SliderSizeManage.Maximum / 100);
-            SlideFileInfo.Content = SliderSizeManage.Value.ToString() + "/" + SliderSizeManage.Maximum.ToString() + " byte(s) = " + (SliderSizeManage.Value < 1024 ? "0.0" : (Math.Round(SliderSizeManage.Value / 1048576, 2)).ToString()) + "/" + (Math.Round(SliderSizeManage.Maximum / 1048576, 2)).ToString() + " MB" + " [" + String.Format("{0:F6}", Math.Round(percent, 6)) + "%" + "]";
+            SlideFileInfo.Content = SliderSizeManage.Value.ToString(CultureInfo.CurrentCulture) + "/" + SliderSizeManage.Maximum.ToString(CultureInfo.CurrentCulture) + " byte(s) = " + (SliderSizeManage.Value < 1024 ? "0.0" : (Math.Round(SliderSizeManage.Value / 1048576, 2)).ToString(CultureInfo.CurrentCulture)) + "/" + (Math.Round(SliderSizeManage.Maximum / 1048576, 2)).ToString(CultureInfo.CurrentCulture) + " MB" + " [" + String.Format(CultureInfo.CurrentCulture,"{0:F6}", Math.Round(percent, 6)) + "%" + "]";
             //
             g.FileManager.Position = (long)SliderSizeManage.Value;
             Dictionary<ReadingDirection, byte[]> showData = g.FileManager.ReadDataAboutPosition((long)SliderSizeManage.Value, g.CacheSize);
 
             string StartData;
             string EndData;
-            switch (currentFormatResult?.ToLower())
+            switch (currentFormatResult?.ToLower(CultureInfo.CurrentCulture))
             {
                 case "hex":
-                    StartData = FileReader.BytesToHEX(showData[ReadingDirection.Left]);
-                    EndData = FileReader.BytesToHEX(showData[ReadingDirection.Rifht]);
+                    StartData = AdapterFileReader.BytesToHEX(showData[ReadingDirection.Left]);
+                    EndData = AdapterFileReader.BytesToHEX(showData[ReadingDirection.Rifht]);
                     break;
                 case "base64":
                     StartData = Convert.ToBase64String(showData[ReadingDirection.Left]);
                     EndData = Convert.ToBase64String(showData[ReadingDirection.Rifht]);
                     break;
                 default:
-                    StartData = FileReader.EncodingMode.GetString(showData[ReadingDirection.Left]);
-                    EndData = FileReader.EncodingMode.GetString(showData[ReadingDirection.Rifht]);
+                    StartData = AdapterFileReader.EncodingMode.GetString(showData[ReadingDirection.Left]);
+                    EndData = AdapterFileReader.EncodingMode.GetString(showData[ReadingDirection.Rifht]);
                     break;
             }
             //
 
             ResultTextBox.Document.Blocks.Clear();
-            TextRange rangeStart = new TextRange(ResultTextBox.Document.ContentEnd, ResultTextBox.Document.ContentEnd);
-            rangeStart.Text = StartData;
+            TextRange rangeStart = new TextRange(ResultTextBox.Document.ContentEnd, ResultTextBox.Document.ContentEnd)
+            {
+                Text = StartData
+            };
             rangeStart.ApplyPropertyValue(TextElement.ForegroundProperty, Brushes.Indigo);
 
-            TextRange rangeEnd = new TextRange(ResultTextBox.Document.ContentEnd, ResultTextBox.Document.ContentEnd);
-            rangeEnd.Text = EndData;
+            TextRange rangeEnd = new TextRange(ResultTextBox.Document.ContentEnd, ResultTextBox.Document.ContentEnd)
+            {
+                Text = EndData
+            };
             rangeEnd.ApplyPropertyValue(TextElement.ForegroundProperty, Brushes.Green);
             if (e == null)
                 return;
         }
 
-
-        public void CacheSizeMenuItem_MouseWheel(object sender, MouseWheelEventArgs e)
+        public void CacheSizeMenuItemMouseWheel(object sender, MouseWheelEventArgs e)
         {
             if (e != null)
             {
                 if (e.Delta > 0)
-                    CacheSizeMenuItem.Tag = (Convert.ToDouble(CacheSizeMenuItem.Tag) + 1).ToString();
+                    CacheSizeMenuItem.Tag = (Convert.ToDouble(CacheSizeMenuItem.Tag, CultureInfo.CurrentCulture) + 100).ToString(CultureInfo.CurrentCulture);
                 else
-                    CacheSizeMenuItem.Tag = (Convert.ToDouble(CacheSizeMenuItem.Tag) - 1).ToString();
+                    CacheSizeMenuItem.Tag = (Convert.ToDouble(CacheSizeMenuItem.Tag, CultureInfo.CurrentCulture) - 100).ToString(CultureInfo.CurrentCulture);
                 //
-                if (CacheSizeMenuItem.Tag.ToString() == "549")
-                    CacheSizeMenuItem.Tag = "550";
-                if (CacheSizeMenuItem.Tag.ToString() == "5556")
-                    CacheSizeMenuItem.Tag = "5555";
             }
-            CacheSizeMenuItem.Header = g.dict["txtBufferByteSize"].ToString() + ": " + CacheSizeMenuItem.Tag.ToString();
-            SliderFile_ValueChanged(null, null);
+            CacheSizeMenuItem.Header = g.Dict["txtBufferByteSize"].ToString() + ": " + CacheSizeMenuItem.Tag.ToString();
+            SliderFileValueChanged(null, null);
         }
-
 
         private void ResultTextBox_ContextMenuClosing(object sender, ContextMenuEventArgs e)
         {
             new ModifyRegistry().Write("cach_size", CacheSizeMenuItem.Tag.ToString());
-            g.CacheSize = Convert.ToInt32(CacheSizeMenuItem.Tag.ToString());
-            SliderFile_ValueChanged(null, null);
+            g.CacheSize = Convert.ToInt32(CacheSizeMenuItem.Tag.ToString(), CultureInfo.CurrentCulture);
+            SliderFileValueChanged(null, null);
         }
-
 
         private void SizeSliderSelectPosition(object sender, RoutedEventArgs e)
         {
-            SliderSizeManage.Value = Convert.ToInt64(((MenuItem)sender).Tag.ToString());
+            SliderSizeManage.Value = Convert.ToInt64(((MenuItem)sender).Tag.ToString(), CultureInfo.CurrentCulture);
         }
-
 
         private void Button_Click_StartSplit(object sender, RoutedEventArgs e)
         {
             if (!File.Exists(PathFile.Text.Trim()))
             {
-                MessageBox.Show(g.dict["txtFileNotExist"].ToString(), g.dict["MessError"].ToString(), MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(g.Dict["txtFileNotExist"].ToString(), g.Dict["MessError"].ToString(), MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
             if (isModeOfSize.IsChecked.Value && (SliderSizeManage.Value <= 0 || SliderSizeManage.Value == SliderSizeManage.Maximum))
             {
-                MessageBox.Show(g.dict["txtSelectCorrectFileSize"].ToString(), g.dict["MessError"].ToString(), MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(g.Dict["txtSelectCorrectFileSize"].ToString(), g.Dict["MessError"].ToString(), MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
-            if (isModeOfText.IsChecked.Value && CutTextBox.Text == "")
+            if (isModeOfText.IsChecked.Value && CutTextBox.Text.Length == 0)
             {
-                MessageBox.Show(g.dict["txtEnterTextCutFile"].ToString(), g.dict["MessError"].ToString(), MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(g.Dict["txtEnterTextCutFile"].ToString(), g.Dict["MessError"].ToString(), MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
             if (isModeOfText.IsChecked.Value)
                 SliderSizeManage.Value = 0;
 
-            if (isModeOfText.IsChecked.Value && currentFormatResult.ToLower() == "hex" && !new System.Text.RegularExpressions.Regex(@"^(\w\w-)+\w\w$").IsMatch(CutTextBox.Text))
+            if (isModeOfText.IsChecked.Value && currentFormatResult.ToLower(CultureInfo.CurrentCulture) == "hex" && !new System.Text.RegularExpressions.Regex(@"^(\w\w-)+\w\w$").IsMatch(CutTextBox.Text))
             {
-                MessageBoxResult result = MessageBox.Show(string.Format(this.Resources.MergedDictionaries[0]["txtErrHEXTextCutFile"].ToString().Replace("\\n", Environment.NewLine), CutTextBox.Text, FileReader.StringToHEX(CutTextBox.Text)), "Warning!", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+                MessageBoxResult result = MessageBox.Show(string.Format(CultureInfo.CurrentCulture, this.Resources.MergedDictionaries[0]["txtErrHEXTextCutFile"].ToString().Replace("\\n", Environment.NewLine), CutTextBox.Text, AdapterFileReader.StringToHEX(CutTextBox.Text)), "Warning!", MessageBoxButton.YesNo, MessageBoxImage.Warning);
                 if (result == MessageBoxResult.No)
                     return;
-                CutTextBox.Text = FileReader.StringToHEX(CutTextBox.Text);
+                CutTextBox.Text = AdapterFileReader.StringToHEX(CutTextBox.Text);
             }
-            Dictionary<Options, string> options = new Dictionary<Options, string>()
-            {{ Options.File, PathFile.Text },
-            {Options.Mode, (isModeOfSize.IsChecked.Value ? "Size" : "Text")},
-            {Options.extMode, (isModeOfSize.IsChecked.Value ? SliderSizeManage.Value.ToString() : CutTextBox.Text)}};
-            FinalSplitWin doSplitForm = new FinalSplitWin(options);
-            //
-            doSplitForm.Owner = Window.GetWindow(this);
-            doSplitForm.Tag = this;
+            Dictionary<OptionsEnum, string> options = new Dictionary<OptionsEnum, string>()
+            {{ OptionsEnum.File, PathFile.Text },
+            {OptionsEnum.Mode, (isModeOfSize.IsChecked.Value ? "Size" : "Text")},
+            {OptionsEnum.extMode, (isModeOfSize.IsChecked.Value ? SliderSizeManage.Value.ToString(CultureInfo.CurrentCulture) : CutTextBox.Text)}};
+            FinalSplitWin doSplitForm = new FinalSplitWin(options)
+            {
+                //
+                Owner = Window.GetWindow(this),
+                Tag = this
+            };
             doSplitForm.ShowDialog();
         }
 
@@ -336,25 +339,25 @@ namespace FileSplitAndJoinWPF
         /// </summary>
         private void MenuItemFindPointCutText_Click(object sender, RoutedEventArgs e)
         {
-            byte[][] searchData;
+            g.FileManager.Scanner.ClearMatchUnits();
 
-            if (currentFormatResult.ToLower() == "hex")
-                searchData = FileScanner.HexToByte(CutTextBox.Text);
+            if (currentFormatResult.ToLower(CultureInfo.CurrentCulture) == "hex")
+                g.FileManager.Scanner.AddMatchUnit(new MatchUnitBytes(AdapterFileReader.HexToByte(CutTextBox.Text)));
             else
-                searchData = FileScanner.StringToSearchBytes(CutTextBox.Text);
+                g.FileManager.Scanner.AddMatchUnit(new MatchUnitText(CutTextBox.Text, false)); //searchData = AdapterFileReader.StringToSearchBytes(CutTextBox.Text);
 
-            long index_detect_find_data = -1;
+            long index_detect_find_data;
             if (SliderSizeManage.Tag is null)
             {
-                index_detect_find_data = g.FileManager.FindData(searchData, (long)SliderSizeManage.Value);
+                index_detect_find_data = g.FileManager.FindPositionData((long)SliderSizeManage.Value);
             }
             else
             {
                 index_detect_find_data = (long)SliderSizeManage.Tag;
-                index_detect_find_data = g.FileManager.FindData(searchData, index_detect_find_data + 1);
+                index_detect_find_data = g.FileManager.FindPositionData(index_detect_find_data + g.FileManager.Scanner.ScanResult.MatchUnit.GetDetectedSearchData().Length);
             }
 
-            if (index_detect_find_data < 0 || index_detect_find_data + searchData.Length >= g.FileManager.Length)
+            if (index_detect_find_data < 0 || index_detect_find_data + g.FileManager.Scanner.MinDataLengthBytes >= g.FileManager.Length)
                 MessageBox.Show("End of file", "End of file", MessageBoxButton.OK, MessageBoxImage.Asterisk);
             else
             {
@@ -370,7 +373,7 @@ namespace FileSplitAndJoinWPF
         /// </summary>
         private void PathFile_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            if (PathFile.Text.Trim() == "")
+            if (PathFile.Text.Trim().Length == 0)
                 Button_Click(null, null);
         }
 
@@ -379,7 +382,7 @@ namespace FileSplitAndJoinWPF
         /// </summary>
         private void SliderSizeManage_MouseWheel(object sender, MouseWheelEventArgs e)
         {
-            SliderSizeManage.Value += e.Delta;
+            SliderSizeManage.Value += e.Delta * 5;
         }
     }
 }

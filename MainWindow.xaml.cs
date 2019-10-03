@@ -3,6 +3,7 @@
 ////////////////////////////////////////////////
 using FileSplitAndJoinWin32;
 using System;
+using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -16,7 +17,7 @@ namespace FileSplitAndJoinWPF
     public partial class MainWindow : Window
     {
         private ucJoin my_ucJoin = new ucJoin();
-        private ucSplit my_ucSplit = new ucSplit();
+        private UcSplit my_ucSplit = new UcSplit();
         private ucMD5 my_ucMD5 = new ucMD5();
 
         public MainWindow()
@@ -34,7 +35,7 @@ namespace FileSplitAndJoinWPF
             System.Globalization.CultureInfo ci = System.Globalization.CultureInfo.InstalledUICulture;
             //ci.ThreeLetterISOLanguageName
             g.last_lang_programm = new ModifyRegistry().Read("last_lang");
-            if (g.last_lang_programm == null || g.last_lang_programm == "")
+            if (g.last_lang_programm == null || g.last_lang_programm.Length == 0)
             {
                 g.last_lang_programm = "eng";
                 foreach (MenuItem li in lngs_MenuItem.Items)
@@ -59,7 +60,7 @@ namespace FileSplitAndJoinWPF
             ////////////////////////////////////////////////////////////
             //
             string latest_mode_programm = new ModifyRegistry().Read("last_mode_programm", "");
-            if (latest_mode_programm == "")
+            if (latest_mode_programm.Length == 0)
                 latest_mode_programm = menu_item_Split.Name;
             if (latest_mode_programm == menu_item_Split.Name)
                 select_mode(menu_item_Split, null);
@@ -73,8 +74,8 @@ namespace FileSplitAndJoinWPF
             my_ucSplit.CachSize = new ModifyRegistry().Read("cach_size", "1024");
             if (my_ucSplit.CachSize == null)
                 my_ucSplit.CachSize = "1024";
-            my_ucSplit.CacheSizeMenuItem_MouseWheel(null, null);
-            g.CacheSize = Convert.ToInt32(my_ucSplit.CachSize);
+            my_ucSplit.CacheSizeMenuItemMouseWheel(null, null);
+            g.CacheSize = Convert.ToInt32(my_ucSplit.CachSize, CultureInfo.CurrentCulture);
 
             ////////////////////////////////////////////////////////////
             //
@@ -84,19 +85,19 @@ namespace FileSplitAndJoinWPF
 
         private void Set_lng(string lng)
         {
-            g.dict = new ResourceDictionary();
+            g.Dict = new ResourceDictionary();
             try
             {
                 // Do not initialize this variable here.
-                g.dict.Source = new Uri("..\\Resources\\StringResources-" + lng + ".xaml", UriKind.Relative);
+                g.Dict.Source = new Uri("..\\Resources\\StringResources-" + lng + ".xaml", UriKind.Relative);
             }
             catch
             {
-                g.dict.Source = new Uri("..\\Resources\\StringResources-eng.xaml", UriKind.Relative);
+                g.Dict.Source = new Uri("..\\Resources\\StringResources-eng.xaml", UriKind.Relative);
             }
             this.Resources.MergedDictionaries.Clear();
-            this.Resources.MergedDictionaries.Add(g.dict);
-            my_ucSplit.Set_lng();
+            this.Resources.MergedDictionaries.Add(g.Dict);
+            my_ucSplit.SetLng();
             my_ucJoin.Set_lng();
             my_ucMD5.Set_lng();
         }

@@ -8,6 +8,7 @@ using System.Windows.Controls;
 using Microsoft.Win32;
 using System.IO;
 using System.Security.Cryptography;
+using System.Globalization;
 
 namespace FileSplitAndJoinWPF
 {
@@ -24,7 +25,7 @@ namespace FileSplitAndJoinWPF
         public void Set_lng()
         {
             this.Resources.MergedDictionaries.Clear();
-            this.Resources.MergedDictionaries.Add(g.dict);
+            this.Resources.MergedDictionaries.Add(g.Dict);
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
@@ -43,11 +44,11 @@ namespace FileSplitAndJoinWPF
             {
                 FileInfo fInfo = new FileInfo(openFileDialog1.FileName);
                 PathFile.Text = "MD5:    " + GetHash(openFileDialog1.FileName);
-                PathFile.Text += Environment.NewLine + Environment.NewLine + g.dict["MD5_FileName"] + ": " + openFileDialog1.FileName;
-                PathFile.Text += Environment.NewLine + g.dict["MD5_Creation"] + ":  " + fInfo.CreationTime;
-                PathFile.Text += Environment.NewLine + g.dict["MD5_LastAccess"] + ":   " + fInfo.LastAccessTime;
-                PathFile.Text += Environment.NewLine + g.dict["MD5_LastWrite"] + ":    " + fInfo.LastWriteTime;
-                PathFile.Text += Environment.NewLine + g.dict["MD5_LengthFile"] + ": " + fInfo.Length + " b";
+                PathFile.Text += Environment.NewLine + Environment.NewLine + g.Dict["MD5_FileName"] + ": " + openFileDialog1.FileName;
+                PathFile.Text += Environment.NewLine + g.Dict["MD5_Creation"] + ":  " + fInfo.CreationTime;
+                PathFile.Text += Environment.NewLine + g.Dict["MD5_LastAccess"] + ":   " + fInfo.LastAccessTime;
+                PathFile.Text += Environment.NewLine + g.Dict["MD5_LastWrite"] + ":    " + fInfo.LastWriteTime;
+                PathFile.Text += Environment.NewLine + g.Dict["MD5_LengthFile"] + ": " + fInfo.Length + " b";
                 if (fInfo.Length > 1024)
                     PathFile.Text += " = " + Math.Round((double)fInfo.Length / 1024, 2) + " kb";
                 if (fInfo.Length > 1024 * 1024)
@@ -64,9 +65,9 @@ namespace FileSplitAndJoinWPF
             using (FileStream fs = File.OpenRead(pathSrc))
             {
                 foreach (Byte b in md5Hasher.ComputeHash(fs))
-                    sb.Append(b.ToString("x2").ToLower());
+                    sb.Append(b.ToString("x2", CultureInfo.CurrentCulture).ToLower(CultureInfo.CurrentCulture));
             }
-
+            md5Hasher.Dispose();
             md5Result = sb.ToString();
 
             return md5Result;

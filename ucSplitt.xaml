@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="FileSplitAndJoinWPF.ucSplit"
+﻿<UserControl x:Class="FileSplitAndJoinWPF.UcSplit"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -29,7 +29,7 @@
                     </TextBox.ContextMenu>
                 </TextBox>
                 <Button Content="{DynamicResource ButtonStartSplit}" Grid.Column="1" Height="30" Margin="0,2,2,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="88" Click="Button_Click_StartSplit"/>
-                <Slider Interval="1" Maximum="0" Value="0" x:Name="SliderSizeManage" Grid.Column="1" VerticalAlignment="Stretch" Margin="0,5,95,5" AutoToolTipPlacement="TopLeft" Cursor="Hand" ContextMenuOpening="SliderSizeManage_ContextMenuOpening" ValueChanged="SliderFile_ValueChanged" Panel.ZIndex="-1" UseLayoutRounding="True" SmallChange="1" SelectionStart="-1" IsSnapToTickEnabled="True" MouseWheel="SliderSizeManage_MouseWheel">
+                <Slider Interval="1" Maximum="0" Value="0" x:Name="SliderSizeManage" Grid.Column="1" VerticalAlignment="Stretch" Margin="0,5,95,5" AutoToolTipPlacement="TopLeft" Cursor="Hand" ContextMenuOpening="SliderSizeManage_ContextMenuOpening" ValueChanged="SliderFileValueChanged" Panel.ZIndex="-1" UseLayoutRounding="True" SmallChange="1" SelectionStart="-1" IsSnapToTickEnabled="True" MouseWheel="SliderSizeManage_MouseWheel">
                     <Slider.ContextMenu>
                         <ContextMenu>
                             <MenuItem Header="Diskette 3.5&quot; 1.44 MB" Tag="1509949" ToolTip="1509949 bytes" Click="SizeSliderSelectPosition"/>
@@ -74,7 +74,7 @@
                         <MenuItem Name="defaultDisplayFormat" Header="HEX" Tag="HEX" Click="SelectFormat_Click"/>
                         <MenuItem Name="base64DisplayFormat" Header="base64" Tag="base64" Click="SelectFormat_Click"/>
                     </MenuItem>
-                    <MenuItem x:Name="CacheSizeMenuItem" Header="Buffer size: 550" Tag="550" MouseWheel="CacheSizeMenuItem_MouseWheel"></MenuItem>
+                    <MenuItem x:Name="CacheSizeMenuItem" Header="Buffer size: 550" Tag="550" MouseWheel="CacheSizeMenuItemMouseWheel" ToolTip="Для изменения размера воспользуйтесь колёсиком мыши"></MenuItem>
                 </ContextMenu>
             </RichTextBox.ContextMenu>
             <FlowDocument>

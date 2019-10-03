@@ -8,6 +8,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
+using TextFileScanerLib;
 
 namespace FileSplitAndJoinWPF
 {
@@ -24,7 +25,7 @@ namespace FileSplitAndJoinWPF
         public void Set_lng()
         {
             Resources.MergedDictionaries.Clear();
-            Resources.MergedDictionaries.Add(g.dict);
+            Resources.MergedDictionaries.Add(g.Dict);
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
@@ -189,7 +190,7 @@ namespace FileSplitAndJoinWPF
                 foreach (FileForJoin item in ListViewFiles.Items)
                     files[index++] = item.Name;
 
-                DataFileScanerLib.FileWriter.JoinFiles(files, saveFileDialog1.FileName);
+                AdapterFileWriter.JoinFiles(files, saveFileDialog1.FileName);
                 g.OpenFolder(Path.GetDirectoryName(saveFileDialog1.FileName));
             }
         }

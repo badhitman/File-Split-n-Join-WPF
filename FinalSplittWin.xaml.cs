@@ -1,18 +1,21 @@
 ﻿////////////////////////////////////////////////
 // © https://github.com/badhitman 
 ////////////////////////////////////////////////
-using DataFileScanerLib;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Forms;
 using System.Windows.Input;
+using TextFileScanerLib;
+using TextFileScanerLib.Matches;
+using TextFileScanerLib.scan.matches;
 
 namespace FileSplitAndJoinWPF
 {
-    public enum Options { File, Mode, extMode };
+    public enum OptionsEnum { File, Mode, extMode };
     /// <summary>
     /// Логика взаимодействия для FinalSplitWin.xaml
     /// </summary>
@@ -21,31 +24,34 @@ namespace FileSplitAndJoinWPF
         public delegate void SplitFileOfSizeDelegate(string destFolder, long size, int repeatEvery = 1);
         //public SplitFileOfSizeDelegate SplitFileOfSizeDelegateObj;
 
-        public delegate void SplitFileOfDataDelegate(string destFolder, byte[][] dataSearch, int repeatEvery = 1);
+        public delegate void SplitFileOfDataDelegate(string destFolder, int repeatEvery = 1);
         //public SplitFileOfDataDelegate SplitFileOfDataDelegateObj;
 
-        private Dictionary<Options, string> myOptions = new Dictionary<Options, string>();
+        private Dictionary<OptionsEnum, string> myOptions = new Dictionary<OptionsEnum, string>();
 
         public FinalSplitWin()
         {
             InitializeComponent();
-            Set_lng();
+            SetLng();
         }
 
-        public void Set_lng()
+        public void SetLng()
         {
             Resources.MergedDictionaries.Clear();
-            Resources.MergedDictionaries.Add(g.dict);
+            Resources.MergedDictionaries.Add(g.Dict);
         }
 
-        public FinalSplitWin(Dictionary<Options, string> inOptions)
+        public FinalSplitWin(Dictionary<OptionsEnum, string> inOptions)
         {
+            if (inOptions is null)
+                throw new ArgumentNullException(nameof(inOptions));
+
             InitializeComponent();
-            Set_lng();
+            SetLng();
             myOptions = inOptions;
-            Title += " - " + myOptions[Options.File];
-            LabelSplitMode.Content += " " + myOptions[Options.Mode];
-            LabelSplitOf.Content += " " + myOptions[Options.extMode];
+            Title += " - " + myOptions[OptionsEnum.File];
+            LabelSplitMode.Content += " " + myOptions[OptionsEnum.Mode];
+            LabelSplitOf.Content += " " + myOptions[OptionsEnum.extMode];
         }
 
         /// <summary>
@@ -53,7 +59,7 @@ namespace FileSplitAndJoinWPF
         /// </summary>
         private void wathRepeat_TextChanged(object sender, TextChangedEventArgs e)
         {
-            if (!System.Text.RegularExpressions.Regex.IsMatch(dimension_group.Text.ToString(), @"^[1-9]+\d*$"))
+            if (!System.Text.RegularExpressions.Regex.IsMatch(dimension_group.Text.ToString(CultureInfo.CurrentCulture), @"^[1-9]+\d*$"))
             {
                 dimension_group.Text = dimension_group.Tag.ToString();
                 dimension_group.Select(dimension_group.Text.Length, 0);
@@ -71,7 +77,7 @@ namespace FileSplitAndJoinWPF
         {
             FolderBrowserDialog dialog = new FolderBrowserDialog();
             dialog.ShowNewFolderButton = true;
-            dialog.SelectedPath = Path.GetDirectoryName(myOptions[Options.File]);
+            dialog.SelectedPath = Path.GetDirectoryName(myOptions[OptionsEnum.File]);
             DialogResult result = dialog.ShowDialog();
             if (result == System.Windows.Forms.DialogResult.OK)
             {
@@ -84,29 +90,28 @@ namespace FileSplitAndJoinWPF
         /// </summary>
         private void Button_Click_Start(object sender, RoutedEventArgs e)
         {
-            if (DestinationFolderTextBox.Text.Trim() == "" || !Directory.Exists(DestinationFolderTextBox.Text))
+            if (DestinationFolderTextBox.Text.Trim().Length == 0 || !Directory.Exists(DestinationFolderTextBox.Text))
             {
-                System.Windows.MessageBox.Show(g.dict["MessSpecifyDestinationFolder"].ToString(), g.dict["MessError"].ToString(), MessageBoxButton.OK, MessageBoxImage.Error);
+                System.Windows.MessageBox.Show(g.Dict["MessSpecifyDestinationFolder"].ToString(), g.Dict["MessError"].ToString(), MessageBoxButton.OK, MessageBoxImage.Error);
                 DestinationFolderTextBox.Focus();
                 return;
             }
 
             string DestinationFolderTextBoxText = DestinationFolderTextBox.Text;
             ProgressBarSplitFile.Value = 0;
-            if (myOptions[Options.Mode].ToLower() == "size")
-                new SplitFileOfSizeDelegate(g.FileManager.SplitFile).BeginInvoke(DestinationFolderTextBox.Text, Convert.ToInt64(myOptions[Options.extMode]), Convert.ToInt32(dimension_group.Text), delegate { g.OpenFolder(DestinationFolderTextBoxText); }, null);
+            if (myOptions[OptionsEnum.Mode].ToLower(CultureInfo.CurrentCulture) == "size")
+                new SplitFileOfSizeDelegate(g.FileManager.SplitFile).BeginInvoke(DestinationFolderTextBox.Text, Convert.ToInt64(myOptions[OptionsEnum.extMode], CultureInfo.CurrentCulture), Convert.ToInt32(dimension_group.Text, CultureInfo.CurrentCulture), delegate { g.OpenFolder(DestinationFolderTextBoxText); }, null);
             else
             {
-                byte[][] dataSearch;
-                if (((ucSplit)this.Tag).currentFormatResult.ToLower() == "hex")
-                    dataSearch = FileScanner.HexToByte(myOptions[Options.extMode]);
+                g.FileManager.Scanner.ClearMatchUnits();
+                if (((UcSplit)this.Tag).currentFormatResult.ToLower(CultureInfo.CurrentCulture) == "hex")
+                    g.FileManager.Scanner.AddMatchUnit(new MatchUnitBytes(AdapterFileReader.HexToByte(myOptions[OptionsEnum.extMode])));
                 else
-                    dataSearch = FileScanner.StringToSearchBytes(myOptions[Options.extMode]);
+                    g.FileManager.Scanner.AddMatchUnit(new MatchUnitText(myOptions[OptionsEnum.extMode], true));
 
                 g.FileManager.ProgressValueChange += FileManager_ProgressValueChange;
-                new SplitFileOfDataDelegate(g.FileManager.SplitFile).BeginInvoke(DestinationFolderTextBox.Text, dataSearch, Convert.ToInt32(dimension_group.Text), delegate { g.OpenFolder(DestinationFolderTextBoxText); }, null);
+                new SplitFileOfDataDelegate(g.FileManager.SplitFile).BeginInvoke(DestinationFolderTextBox.Text, Convert.ToInt32(dimension_group.Text, CultureInfo.CurrentCulture), delegate { g.OpenFolder(DestinationFolderTextBoxText); }, null);
             }
-
         }
 
         /// <summary>
@@ -131,9 +136,9 @@ namespace FileSplitAndJoinWPF
                 return;
 
             if (e.Delta > 0)
-                dimension_group.Text = (Convert.ToInt16(dimension_group.Text) + 1).ToString();
+                dimension_group.Text = (Convert.ToInt16(dimension_group.Text, CultureInfo.CurrentCulture) + 1).ToString(CultureInfo.CurrentCulture);
             else
-                dimension_group.Text = (Convert.ToInt16(dimension_group.Text) - 1).ToString();
+                dimension_group.Text = (Convert.ToInt16(dimension_group.Text, CultureInfo.CurrentCulture) - 1).ToString(CultureInfo.CurrentCulture);
         }
 
 
