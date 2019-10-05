@@ -354,7 +354,7 @@ namespace FileSplitAndJoinWPF
             else
             {
                 index_detect_find_data = (long)SliderSizeManage.Tag;
-                index_detect_find_data = g.FileManager.FindPositionData(index_detect_find_data + g.FileManager.Scanner.ScanResult.MatchUnit.GetDetectedSearchData().Length);
+                index_detect_find_data = g.FileManager.FindPositionData(index_detect_find_data + 1);
             }
 
             if (index_detect_find_data < 0 || index_detect_find_data + g.FileManager.Scanner.MinDataLengthBytes >= g.FileManager.Length)
